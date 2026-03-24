@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<!-- saved from url=(0103)file:///C:/Users/curtis.zhu/OneDrive%20-%20Driscoll's,%20Inc/Desktop/hhh/%E5%A4%87%E4%BB%BD2/index.html -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>病虫害快采系统</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #1a2a2f;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 560px;
+            width: 100%;
+            margin: 0 auto;
+            background: #0f171c;
+            border-radius: 48px;
+            padding: 20px 18px 28px;
+            box-shadow: 0 16px 30px rgba(0,0,0,0.5);
+            border: 1px solid #2d454b;
+        }
+
+        .page {
+            transition: opacity 0.2s ease;
+        }
+        .hidden-page {
+            display: none;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            background: #1f2e34;
+            padding: 12px 20px;
+            border-radius: 60px;
+        }
+        .point-tag {
+            background: #f4b942;
+            color: #1e2a2e;
+            font-weight: 800;
+            font-size: 1.3rem;
+            padding: 5px 18px;
+            border-radius: 40px;
+            letter-spacing: 1px;
+        }
+        .back-home-btn {
+            background: #3e5a5f;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 8px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 2px 0 #1f2e30;
+            transition: 0.05s linear;
+        }
+        .back-home-btn:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        .category-block {
+            margin-bottom: 32px;
+            background: #112026;
+            border-radius: 48px;
+            padding: 12px 14px 18px;
+            border-left: 6px solid #f4b942;
+        }
+        .category-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 0 0 12px 8px;
+            color: #ffdd99;
+            letter-spacing: 1px;
+        }
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 14px;
+        }
+        .pest-card {
+            background: #1f2f36;
+            border-radius: 36px;
+            text-align: center;
+            padding: 14px 6px;
+            font-weight: bold;
+            font-size: 1.35rem;
+            color: #f0f0e0;
+            box-shadow: 0 4px 0 #0b171c;
+            cursor: pointer;
+            transition: 0.05s linear;
+            border: 1px solid #3a5a60;
+        }
+        .pest-card:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #0b171c;
+        }
+        .unknown-card {
+            background: #2c3e2f;
+            border: 1px solid #6f8f6a;
+        }
+        .detail-header {
+            margin-bottom: 16px;
+        }
+        .detail-name {
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: #f4b94230;
+            display: inline-block;
+            padding: 8px 28px;
+            border-radius: 60px;
+            color: #ffdd99;
+            text-align: center;
+            width: 100%;
+        }
+        .field-card {
+            background: #1e2a32;
+            border-radius: 48px;
+            padding: 16px 20px;
+            margin-bottom: 28px;
+            border: 1px solid #3e6a70;
+        }
+        .field-label {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #f4c97a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stepper-item {
+            margin-bottom: 28px;
+        }
+        .count-digit {
+            background: #000000aa;
+            font-size: 3.8rem;
+            font-weight: 800;
+            text-align: center;
+            padding: 12px;
+            border-radius: 60px;
+            margin: 8px 0;
+            color: #f4b942;
+            font-family: monospace;
+            letter-spacing: 4px;
+            border: 1px solid #ffb347;
+        }
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .step-btn {
+            background: #2c4b3e;
+            border: none;
+            font-weight: bold;
+            border-radius: 48px;
+            padding: 12px 18px;
+            font-size: 1.6rem;
+            min-width: 70px;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 3px 0 #1a2e24;
+            transition: 0.02s linear;
+            flex: 1;
+            text-align: center;
+        }
+        .step-btn:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+        .reset-btn-sm {
+            background: #5f6c6e;
+            box-shadow: 0 3px 0 #3a4648;
+        }
+        .submit-btn-large {
+            background: #f4b942;
+            color: #1e2a2e;
+            font-size: 1.9rem;
+            font-weight: 800;
+            padding: 18px;
+            width: 100%;
+            border-radius: 60px;
+            border: none;
+            margin-top: 8px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #b97f10;
+            transition: 0.05s linear;
+        }
+        .submit-btn-large:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #b97f10;
+        }
+        .inspector-area {
+            background: #0f1a1f;
+            border-radius: 60px;
+            padding: 12px 18px;
+            margin-bottom: 20px;
+        }
+        .inspector-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            background: #0a0f14;
+            border: 2px solid #f4b942;
+            border-radius: 60px;
+            color: #f0f0f0;
+            text-align: center;
+            outline: none;
+        }
+        .message-box {
+            background: #00000077;
+            border-radius: 40px;
+            padding: 10px 12px;
+            margin-top: 18px;
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: bold;
+            backdrop-filter: blur(3px);
+        }
+        .offline-hint {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 12px;
+            color: #8aaeb3;
+        }
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 18px;
+            color: #5e8288;
+        }
+        @media (max-width: 500px) {
+            .app-container { padding: 14px; }
+            .grid-cards { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            .pest-card { font-size: 1.2rem; padding: 12px 4px; }
+            .count-digit { font-size: 2.8rem; }
+            .step-btn { font-size: 1.3rem; padding: 10px 12px; }
+        }
+        button {
+            font-family: inherit;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="appRoot">
+    <!-- 首页 -->
+    <div id="homePage" class="page">
+        <div class="header-bar">
+            <div class="point-tag" id="homePointId">🌾 DEMO-FIELD-01</div>
+            <div class="offline-hint" style="background: none; margin:0;">💾 离线记忆</div>
+        </div>
+
+        <div class="inspector-area">
+            <input type="text" id="globalInspector" class="inspector-input" placeholder="采集员姓名 (自动保存)" autocomplete="off">
+        </div><div class="category-block">
+            <div class="category-title">害虫</div>
+            <div class="grid-cards" id="pestGroup">
+                <div class="pest-card" data-type="pest" data-name="蓟马" data-multi="true">蓟马<br><span style="font-size:0.75rem;">3叶片计数</span></div>
+                <div class="pest-card" data-type="pest" data-name="蚜虫" data-multi="true">蚜虫<br><span style="font-size:0.75rem;">3次计数</span></div>
+                <div class="pest-card" data-type="pest" data-name="红蜘蛛" data-multi="false">红蜘蛛</div>
+                <div class="pest-card" data-type="pest" data-name="青虫" data-multi="false">青虫</div>
+                <div class="pest-card" data-type="pest" data-name="其他虫害" data-multi="false">其他</div>
+            </div>
+        </div>
+
+        <div class="category-block">
+            <div class="category-title">病害</div>
+            <div class="grid-cards" id="diseaseGroup">
+                <div class="pest-card" data-type="disease" data-name="白粉病" data-multi="false">白粉病</div>
+                <div class="pest-card" data-type="disease" data-name="枝枯病" data-multi="false">枝枯病</div>
+                <div class="pest-card" data-type="disease" data-name="灰霉病" data-multi="false">灰霉病</div>
+            <div class="pest-card" data-type="disease" data-name="其他病害" data-multi="false">其他病害</div></div>
+        </div>
+
+        <div class="category-block">
+            <div class="category-title">❓ 未知</div>
+            <div class="grid-cards">
+                <div class="pest-card unknown-card" data-type="unknown" data-name="未知症状" data-multi="false">未知症状</div>
+            </div>
+        </div>
+
+        
+        
+        
+    </div>
+
+    <!-- 详情页 -->
+    <div id="detailPage" class="page hidden-page">
+        <div class="header-bar">
+            <div class="point-tag" id="detailPointId">DEMO-FIELD-01</div>
+            <button id="backHomeBtn" class="back-home-btn">🏠 回主页</button>
+        </div>
+        <div id="detailDynamicContent"><div class="detail-header"><div class="detail-name">🔍 其他虫害</div></div>
+                <div class="field-card">
+                    <div class="field-label">🐛 发生数量 (头/株/叶片)</div>
+                    <div class="count-digit" id="singleCountDisplay">0</div>
+                    <div class="btn-row">
+                        <button class="step-btn" data-step="1">+1</button>
+                        <button class="step-btn" data-step="3">+3</button>
+                        <button class="step-btn" data-step="5">+5</button>
+                        <button class="step-btn" data-step="10">+10</button>
+                        <button class="step-btn reset-btn-sm" id="resetSingleBtn">归零</button>
+                    </div>
+                </div>
+            <button id="submitDetailBtn" class="submit-btn-large">📡 提交数据</button></div>
+        <div class="message-box" id="detailMsg" style="color: rgb(255, 188, 159);">📝 正在采集: 其他虫害</div>
+        <footer>点击+快速计数，提交后返回首页继续采集</footer>
+    </div>
+</div>
+
+<script>
+    // 全局状态
+    let currentPointId = null;
+    let globalInspectorName = "";
+    let currentDetail = {
+        name: '',
+        type: '',
+        multiMode: false,
+        counts: [0, 0, 0],
+        singleCount: 0
+    };
+
+    // DOM 元素
+    const homePage = document.getElementById('homePage');
+    const detailPage = document.getElementById('detailPage');
+    const homePointSpan = document.getElementById('homePointId');
+    const detailPointSpan = document.getElementById('detailPointId');
+    const globalInspectorInput = document.getElementById('globalInspector');
+    const backHomeBtn = document.getElementById('backHomeBtn');
+    const detailDynamic = document.getElementById('detailDynamicContent');
+    const globalMsgHome = document.getElementById('globalMsgHome');
+    const detailMsgBox = document.getElementById('detailMsg');
+
+    // 后端地址
+    const BACKEND_URL = 'http://localhost:8000';
+
+    // 显示消息
+    function showMessageHome(msg, isError = false) {
+        globalMsgHome.innerHTML = isError ? `❌ ${msg}` : `📢 ${msg}`;
+        globalMsgHome.style.color = isError ? '#ffaa99' : '#d4e6b0';
+        setTimeout(() => {
+            if (globalMsgHome && homePage.classList.contains('hidden-page') === false) {
+                globalMsgHome.innerHTML = '📋 点击任意病害/虫害开始计数';
+            }
+        }, 3000);
+    }
+
+    function showDetailMessage(msg, isError = false) {
+        detailMsgBox.innerHTML = isError ? `⚠️ ${msg}` : `✅ ${msg}`;
+        detailMsgBox.style.color = isError ? '#ffbc9f' : '#c6f7c6';
+        setTimeout(() => {
+            if (detailMsgBox && detailPage.classList.contains('hidden-page') === false) {
+                detailMsgBox.innerHTML = '等待填写数据';
+            }
+        }, 3000);
+    }
+
+    // 姓名存储
+    function saveInspector(name) {
+        if (name && name.trim() !== "") {
+            localStorage.setItem('pest_inspector_v3', name.trim());
+            globalInspectorName = name.trim();
+        } else {
+            globalInspectorName = "";
+            localStorage.removeItem('pest_inspector_v3');
+        }
+    }
+
+    function loadInspector() {
+        const saved = localStorage.getItem('pest_inspector_v3');
+        if (saved) {
+            globalInspectorName = saved;
+            globalInspectorInput.value = saved;
+        } else {
+            globalInspectorInput.value = "";
+            globalInspectorName = "";
+        }
+    }
+
+    // URL参数
+    function getPointIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let pid = urlParams.get('point_id');
+        if (!pid) pid = urlParams.get('pointId');
+        if (pid && pid.trim() !== "") return pid.trim();
+        return "DEMO-FIELD-01";
+    }
+
+    // 离线队列
+    const PENDING_KEY = 'pest_pending_v3';
+    function getPendingQueue() {
+        const raw = localStorage.getItem(PENDING_KEY);
+        if (!raw) return [];
+        try { return JSON.parse(raw); } catch (e) { return []; }
+    }
+    function savePendingQueue(queue) {
+        localStorage.setItem(PENDING_KEY, JSON.stringify(queue));
+    }
+    function addPendingRecord(data) {
+        const q = getPendingQueue();
+        q.push({ ...data, pending_time: new Date().toISOString() });
+        savePendingQueue(q);
+        showDetailMessage(`⚠️ 网络异常，数据已本地暂存 (待传${q.length}条)`, true);
+        setTimeout(() => retryAllPending(), 5000);
+    }
+
+    async function submitToServer(payload) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        try {
+            const response = await fetch(`${BACKEND_URL}/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            return await response.json();
+        } catch (err) {
+            clearTimeout(timeoutId);
+            throw err;
+        }
+    }
+
+    async function retryAllPending() {
+        const queue = getPendingQueue();
+        if (queue.length === 0) return;
+        const successIndices = [];
+        for (let i = 0; i < queue.length; i++) {
+            try {
+                await submitToServer(queue[i]);
+                successIndices.push(i);
+            } catch (e) {
+                console.warn("重传失败", e);
+            }
+        }
+        if (successIndices.length > 0) {
+            const newQueue = queue.filter((_, idx) => !successIndices.includes(idx));
+            savePendingQueue(newQueue);
+            if (detailPage.classList.contains('hidden-page') === false) {
+                showDetailMessage(`📤 成功重传 ${successIndices.length} 条离线数据`, false);
+            }
+        }
+    }
+
+    // 提交当前数据
+    async function submitCurrentData() {
+        let inspector = globalInspectorInput.value.trim();
+        if (!inspector) {
+            showDetailMessage("请填写采集员姓名", true);
+            globalInspectorInput.focus();
+            return false;
+        }
+        globalInspectorName = inspector;
+        saveInspector(inspector);
+
+        if (!currentPointId) currentPointId = getPointIdFromUrl();
+
+        const now = new Date();
+        const timestamp = now.toISOString();
+        let pestCountValue;
+        let subCounts = null;
+
+        if (currentDetail.multiMode && currentDetail.name === "蓟马") {
+            subCounts = {
+                leaf1: currentDetail.counts[0],
+                leaf2: currentDetail.counts[1],
+                leaf3: currentDetail.counts[2]
+            };
+            pestCountValue = currentDetail.counts[0] + currentDetail.counts[1] + currentDetail.counts[2];
+        } else {
+            pestCountValue = currentDetail.singleCount;
+        }
+
+        const payload = {
+            point_id: currentPointId,
+            inspector_name: globalInspectorName,
+            pest_type: currentDetail.name,
+            category: currentDetail.type || "unknown",
+            pest_count: pestCountValue,
+            timestamp: timestamp,
+            unix_ms: now.getTime()
+        };
+
+        if (subCounts) {
+            payload.detailed_counts = subCounts;
+        }
+
+        console.log("提交数据:", payload);
+
+        const submitBtn = document.querySelector('#submitDetailBtn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "⏳ 提交中...";
+        }
+
+        try {
+            const result = await submitToServer(payload);
+            showDetailMessage(`✅ 提交成功！${currentDetail.name} 数量已记录`, false);
+            // 提交成功后不清零，保持当前数量方便连续采集
+            setTimeout(() => retryAllPending(), 1000);
+            return true;
+        } catch (err) {
+            console.error("提交错误:", err);
+            let errorMsg = err.message;
+            if (err.name === 'AbortError') errorMsg = "网络超时";
+            showDetailMessage(`提交失败: ${errorMsg}，已本地保存`, true);
+            addPendingRecord(payload);
+            return false;
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "📡 提交数据";
+            }
+        }
+    }
+
+    // 渲染详情页
+    function renderDetailPage(name, type, multiMode) {
+        currentDetail = {
+            name: name,
+            type: type,
+            multiMode: multiMode,
+            counts: [0, 0, 0],
+            singleCount: 0
+        };
+
+        let html = `<div class="detail-header"><div class="detail-name">🔍 ${name}</div></div>`;
+
+        if (multiMode && name === "蓟马"&"蚜虫") {
+            const labels = ["第1片叶/枝", "第2片叶/枝", "第3片叶/枝"];
+            for (let i = 0; i < 3; i++) {
+                html += `
+                    <div class="field-card stepper-item" data-index="${i}">
+                        <div class="field-label">🌿 ${labels[i]}</div>
+                        <div class="count-digit" id="multiCount_${i}">0</div>
+                        <div class="btn-row">
+                            <button class="step-btn" data-multi-idx="${i}" data-step="1">+1</button>
+                            <button class="step-btn" data-multi-idx="${i}" data-step="3">+3</button>
+                            <button class="step-btn" data-multi-idx="${i}" data-step="5">+5</button>
+                            <button class="step-btn reset-btn-sm" data-multi-idx="${i}" data-reset="true">归零</button>
+                        </div>
+                    </div>
+                `;
+            }
+        } else {
+            html += `
+                <div class="field-card">
+                    <div class="field-label">🐛 发生数量 (头/株/叶片)</div>
+                    <div class="count-digit" id="singleCountDisplay">0</div>
+                    <div class="btn-row">
+                        <button class="step-btn" data-step="1">+1</button>
+                        <button class="step-btn" data-step="3">+3</button>
+                        <button class="step-btn" data-step="5">+5</button>
+                        <button class="step-btn" data-step="10">+10</button>
+                        <button class="step-btn reset-btn-sm" id="resetSingleBtn">归零</button>
+                    </div>
+                </div>
+            `;
+        }
+        html += `<button id="submitDetailBtn" class="submit-btn-large">📡 提交数据</button>`;
+        detailDynamic.innerHTML = html;
+
+        // 绑定事件
+        if (multiMode && (name === "蓟马" || name === "蚜虫") {
+            for (let i = 0; i < 3; i++) {
+                const updateDisplay = () => {
+                    const span = document.getElementById(`multiCount_${i}`);
+                    if (span) span.innerText = currentDetail.counts[i];
+                };
+
+                const plus1 = document.querySelector(`[data-multi-idx="${i}"][data-step="1"]`);
+                const plus3 = document.querySelector(`[d…</script>
+
+</body></html>
