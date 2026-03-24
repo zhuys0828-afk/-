@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<!-- saved from url=(0103)file:///C:/Users/curtis.zhu/OneDrive%20-%20Driscoll's,%20Inc/Desktop/hhh/%E5%A4%87%E4%BB%BD2/index.html -->
-<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>病虫害快采系统</title>
     <style>
@@ -271,17 +271,18 @@
     <!-- 首页 -->
     <div id="homePage" class="page">
         <div class="header-bar">
-            <div class="point-tag" id="homePointId">🌾 DEMO-FIELD-01</div>
+            <div class="point-tag" id="homePointId">🌾 点位 --</div>
             <div class="offline-hint" style="background: none; margin:0;">💾 离线记忆</div>
         </div>
-
         <div class="inspector-area">
-            <input type="text" id="globalInspector" class="inspector-input" placeholder="采集员姓名 (自动保存)" autocomplete="off">
-        </div><div class="category-block">
-            <div class="category-title">害虫</div>
+            <input type="text" id="globalInspector" class="inspector-input" placeholder="👨‍🌾 采集员姓名 (自动保存)" autocomplete="off">
+        </div>
+
+        <div class="category-block">
+            <div class="category-title">🐛 虫害</div>
             <div class="grid-cards" id="pestGroup">
                 <div class="pest-card" data-type="pest" data-name="蓟马" data-multi="true">蓟马<br><span style="font-size:0.75rem;">3叶片计数</span></div>
-                <div class="pest-card" data-type="pest" data-name="蚜虫" data-multi="true">蚜虫<br><span style="font-size:0.75rem;">3次计数</span></div>
+                <div class="pest-card" data-type="pest" data-name="蚜虫" data-multi="true">蚜虫<br><span style="font-size:0.75rem;">3叶片计数</span></div>
                 <div class="pest-card" data-type="pest" data-name="红蜘蛛" data-multi="false">红蜘蛛</div>
                 <div class="pest-card" data-type="pest" data-name="青虫" data-multi="false">青虫</div>
                 <div class="pest-card" data-type="pest" data-name="其他虫害" data-multi="false">其他</div>
@@ -289,12 +290,12 @@
         </div>
 
         <div class="category-block">
-            <div class="category-title">病害</div>
+            <div class="category-title">🍂 病害</div>
             <div class="grid-cards" id="diseaseGroup">
                 <div class="pest-card" data-type="disease" data-name="白粉病" data-multi="false">白粉病</div>
                 <div class="pest-card" data-type="disease" data-name="枝枯病" data-multi="false">枝枯病</div>
                 <div class="pest-card" data-type="disease" data-name="灰霉病" data-multi="false">灰霉病</div>
-            <div class="pest-card" data-type="disease" data-name="其他病害" data-multi="false">其他病害</div></div>
+            </div>
         </div>
 
         <div class="category-block">
@@ -304,31 +305,19 @@
             </div>
         </div>
 
-        
-        
-        
+
+        <div class="message-box" id="globalMsgHome">📋 点击任意病害/虫害开始计数</div>
+        <footer>⚡ 大按钮 · 离线缓存 · 减少滑动</footer>
     </div>
 
     <!-- 详情页 -->
     <div id="detailPage" class="page hidden-page">
         <div class="header-bar">
-            <div class="point-tag" id="detailPointId">DEMO-FIELD-01</div>
+            <div class="point-tag" id="detailPointId">点位 --</div>
             <button id="backHomeBtn" class="back-home-btn">🏠 回主页</button>
         </div>
-        <div id="detailDynamicContent"><div class="detail-header"><div class="detail-name">🔍 其他虫害</div></div>
-                <div class="field-card">
-                    <div class="field-label">🐛 发生数量 (头/株/叶片)</div>
-                    <div class="count-digit" id="singleCountDisplay">0</div>
-                    <div class="btn-row">
-                        <button class="step-btn" data-step="1">+1</button>
-                        <button class="step-btn" data-step="3">+3</button>
-                        <button class="step-btn" data-step="5">+5</button>
-                        <button class="step-btn" data-step="10">+10</button>
-                        <button class="step-btn reset-btn-sm" id="resetSingleBtn">归零</button>
-                    </div>
-                </div>
-            <button id="submitDetailBtn" class="submit-btn-large">📡 提交数据</button></div>
-        <div class="message-box" id="detailMsg" style="color: rgb(255, 188, 159);">📝 正在采集: 其他虫害</div>
+        <div id="detailDynamicContent"></div>
+        <div class="message-box" id="detailMsg">等待填写数据</div>
         <footer>点击+快速计数，提交后返回首页继续采集</footer>
     </div>
 </div>
@@ -559,7 +548,7 @@
 
         let html = `<div class="detail-header"><div class="detail-name">🔍 ${name}</div></div>`;
 
-        if (multiMode && name === "蓟马"&"蚜虫") {
+        if (multiMode && (name === "蓟马" || name === "蚜虫")) {
             const labels = ["第1片叶/枝", "第2片叶/枝", "第3片叶/枝"];
             for (let i = 0; i < 3; i++) {
                 html += `
@@ -594,7 +583,7 @@
         detailDynamic.innerHTML = html;
 
         // 绑定事件
-        if (multiMode && (name === "蓟马" || name === "蚜虫") {
+        if (multiMode && (name === "蓟马" || name === "蚜虫")) {
             for (let i = 0; i < 3; i++) {
                 const updateDisplay = () => {
                     const span = document.getElementById(`multiCount_${i}`);
@@ -602,6 +591,102 @@
                 };
 
                 const plus1 = document.querySelector(`[data-multi-idx="${i}"][data-step="1"]`);
-                const plus3 = document.querySelector(`[d…</script>
+                const plus3 = document.querySelector(`[data-multi-idx="${i}"][data-step="3"]`);
+                const plus5 = document.querySelector(`[data-multi-idx="${i}"][data-step="5"]`);
+                const reset = document.querySelector(`[data-multi-idx="${i}"][data-reset="true"]`);
 
-</body></html>
+                if (plus1) plus1.onclick = () => { currentDetail.counts[i] = Math.min(999, currentDetail.counts[i] + 1); updateDisplay(); };
+                if (plus3) plus3.onclick = () => { currentDetail.counts[i] = Math.min(999, currentDetail.counts[i] + 3); updateDisplay(); };
+                if (plus5) plus5.onclick = () => { currentDetail.counts[i] = Math.min(999, currentDetail.counts[i] + 5); updateDisplay(); };
+                if (reset) reset.onclick = () => { currentDetail.counts[i] = 0; updateDisplay(); };
+                updateDisplay();
+            }
+        } else {
+            const displaySpan = document.getElementById('singleCountDisplay');
+            const updateSingle = () => { if (displaySpan) displaySpan.innerText = currentDetail.singleCount; };
+
+            document.querySelectorAll('#detailDynamicContent .step-btn').forEach(btn => {
+                if (btn.id === 'resetSingleBtn') {
+                    btn.onclick = () => { currentDetail.singleCount = 0; updateSingle(); };
+                } else {
+                    const stepVal = parseInt(btn.getAttribute('data-step'), 10);
+                    if (!isNaN(stepVal)) {
+                        btn.onclick = () => {
+                            currentDetail.singleCount = Math.min(999, currentDetail.singleCount + stepVal);
+                            updateSingle();
+                        };
+                    }
+                }
+            });
+            updateSingle();
+        }
+
+        const submitBtn = document.getElementById('submitDetailBtn');
+        if (submitBtn) {
+            submitBtn.onclick = async (e) => {
+                e.preventDefault();
+                await submitCurrentData();
+            };
+        }
+    }
+
+    // 页面切换
+    function showHome() {
+        homePage.classList.remove('hidden-page');
+        detailPage.classList.add('hidden-page');
+        if (currentPointId) homePointSpan.innerHTML = `🌾 ${currentPointId}`;
+        loadInspector();
+        retryAllPending();
+    }
+
+    function showDetail(name, type, multiMode) {
+        renderDetailPage(name, type, multiMode);
+        if (currentPointId) detailPointSpan.innerHTML = `${currentPointId}`;
+        homePage.classList.add('hidden-page');
+        detailPage.classList.remove('hidden-page');
+        detailMsgBox.innerHTML = `📝 正在采集: ${name}`;
+    }
+
+    // 绑定首页卡片
+    function bindCards() {
+        document.querySelectorAll('.pest-card').forEach(card => {
+            card.onclick = (e) => {
+                e.stopPropagation();
+                const name = card.getAttribute('data-name');
+                const type = card.getAttribute('data-type');
+                const multi = card.getAttribute('data-multi') === 'true';
+                if (name) showDetail(name, type, multi);
+            };
+        });
+    }
+
+    // 初始化
+    function init() {
+        currentPointId = getPointIdFromUrl();
+        homePointSpan.innerHTML = `🌾 ${currentPointId}`;
+        detailPointSpan.innerHTML = currentPointId;
+        loadInspector();
+
+        // 姓名自动保存
+        globalInspectorInput.oninput = (e) => {
+            const val = e.target.value.trim();
+            if (val) saveInspector(val);
+            else saveInspector("");
+        };
+
+        backHomeBtn.onclick = showHome;
+        bindCards();
+
+        // 测试后端连接
+        fetch(`${BACKEND_URL}/`)
+            .then(res => res.json())
+            .then(data => console.log("后端连接成功:", data))
+            .catch(err => console.warn("后端未启动:", err));
+
+        showHome();
+    }
+
+    init();
+</script>
+</body>
+</html>
