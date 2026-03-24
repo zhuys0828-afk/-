@@ -12,10 +12,10 @@
         }
 
         body {
-            background: #1a2a2f;
+            background: #ffffff;
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             margin: 0;
-            padding: 12px;
+            padding: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -26,11 +26,11 @@
             max-width: 560px;
             width: 100%;
             margin: 0 auto;
-            background: #0f171c;
-            border-radius: 48px;
-            padding: 20px 18px 28px;
-            box-shadow: 0 16px 30px rgba(0,0,0,0.5);
-            border: 1px solid #2d454b;
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 12px 12px 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
         }
 
         .page {
@@ -45,30 +45,30 @@
             justify-content: space-between;
             align-items: baseline;
             flex-wrap: wrap;
-            margin-bottom: 20px;
-            background: #1f2e34;
-            padding: 12px 20px;
-            border-radius: 60px;
+            margin-bottom: 12px;
+            background: #f5f5f5;
+            padding: 10px 16px;
+            border-radius: 24px;
         }
         .point-tag {
             background: #f4b942;
             color: #1e2a2e;
             font-weight: 800;
-            font-size: 1.3rem;
-            padding: 5px 18px;
+            font-size: 1.1rem;
+            padding: 4px 14px;
             border-radius: 40px;
             letter-spacing: 1px;
         }
         .back-home-btn {
-            background: #3e5a5f;
+            background: #666666;
             border: none;
             color: white;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
-            padding: 8px 18px;
-            border-radius: 40px;
+            padding: 6px 14px;
+            border-radius: 24px;
             cursor: pointer;
-            box-shadow: 0 2px 0 #1f2e30;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: 0.05s linear;
         }
         .back-home-btn:active {
@@ -77,109 +77,168 @@
         }
 
         .category-block {
-            margin-bottom: 32px;
-            background: #112026;
-            border-radius: 48px;
-            padding: 12px 14px 18px;
-            border-left: 6px solid #f4b942;
+            margin-bottom: 16px;
+            background: #f5f5f5;
+            border-radius: 24px;
+            padding: 10px 12px 12px;
+            border-left: 6px solid #999999;
         }
         .category-title {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 800;
-            margin: 0 0 12px 8px;
-            color: #ffdd99;
+            margin: 0 0 8px 6px;
+            color: #333333;
             letter-spacing: 1px;
         }
         .grid-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+            gap: 10px;
         }
         .pest-card {
-            background: #1f2f36;
-            border-radius: 36px;
+            background: #fafafa;
+            border-radius: 24px;
             text-align: center;
-            padding: 14px 6px;
+            padding: 10px 4px;
             font-weight: bold;
-            font-size: 1.35rem;
-            color: #f0f0e0;
-            box-shadow: 0 4px 0 #0b171c;
+            font-size: 1.1rem;
+            color: #333333;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
             cursor: pointer;
             transition: 0.05s linear;
-            border: 1px solid #3a5a60;
+            border: 1px solid #d0d0d0;
         }
         .pest-card:active {
             transform: translateY(2px);
-            box-shadow: 0 1px 0 #0b171c;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
         }
         .unknown-card {
-            background: #2c3e2f;
-            border: 1px solid #6f8f6a;
+            background: #f0f8f0;
+            border: 1px solid #c0e0c0;
         }
         .detail-header {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
         .detail-name {
-            font-size: 2.4rem;
+            font-size: 2rem;
             font-weight: 800;
-            background: #f4b94230;
+            background: #fff5e0;
             display: inline-block;
-            padding: 8px 28px;
-            border-radius: 60px;
-            color: #ffdd99;
+            padding: 8px 24px;
+            border-radius: 32px;
+            color: #d97700;
             text-align: center;
             width: 100%;
         }
         .field-card {
-            background: #1e2a32;
-            border-radius: 48px;
-            padding: 16px 20px;
-            margin-bottom: 28px;
-            border: 1px solid #3e6a70;
+            background: #f9f9f9;
+            border-radius: 20px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            border: 1px solid #e0e0e0;
         }
         .field-label {
-            font-size: 1.2rem;
+            font-size: 1.05rem;
             font-weight: bold;
-            margin-bottom: 12px;
-            color: #f4c97a;
+            margin-bottom: 8px;
+            color: #333333;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         .stepper-item {
-            margin-bottom: 28px;
+            margin-bottom: 14px;
         }
         .count-digit {
-            background: #000000aa;
-            font-size: 3.8rem;
+            background: #f5f5f5;
+            font-size: 3rem;
             font-weight: 800;
             text-align: center;
-            padding: 12px;
-            border-radius: 60px;
-            margin: 8px 0;
+            padding: 10px;
+            border-radius: 20px;
+            margin: 6px 0;
             color: #f4b942;
             font-family: monospace;
             letter-spacing: 4px;
-            border: 1px solid #ffb347;
+            border: 2px solid #f4b942;
+        }
+        .level-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+            margin: 10px 0;
+        }
+        .level-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #666666;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .level-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #666666;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .level-display {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333333;
+            min-height: 50px;
+            margin: 8px 0;
+            border: 1px solid #d0d0d0;
+        }
+        .level-scale {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0 8px 0;
+            font-size: 0.85rem;
+            color: #666666;
+            font-weight: 600;
+        }
+        .level-scale-item {
+            flex: 1;
+            text-align: center;
+            padding: 0 2px;
+        }
+        .level-scale-tick {
+            height: 6px;
+            background: #999999;
+            margin: 0 auto 4px;
+            width: 2px;
         }
         .btn-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 8px;
             justify-content: center;
-            margin-top: 12px;
+            margin-top: 8px;
         }
         .step-btn {
-            background: #2c4b3e;
+            background: #666666;
             border: none;
             font-weight: bold;
-            border-radius: 48px;
-            padding: 12px 18px;
-            font-size: 1.6rem;
-            min-width: 70px;
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 1.2rem;
+            min-width: 65px;
             cursor: pointer;
             color: white;
-            box-shadow: 0 3px 0 #1a2e24;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: 0.02s linear;
             flex: 1;
             text-align: center;
@@ -189,73 +248,74 @@
             box-shadow: none;
         }
         .reset-btn-sm {
-            background: #5f6c6e;
-            box-shadow: 0 3px 0 #3a4648;
+            background: #6c757d;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .submit-btn-large {
             background: #f4b942;
             color: #1e2a2e;
-            font-size: 1.9rem;
+            font-size: 1.6rem;
             font-weight: 800;
-            padding: 18px;
+            padding: 14px;
             width: 100%;
-            border-radius: 60px;
+            border-radius: 24px;
             border: none;
-            margin-top: 8px;
+            margin-top: 6px;
             cursor: pointer;
-            box-shadow: 0 5px 0 #b97f10;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             transition: 0.05s linear;
         }
         .submit-btn-large:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0 #b97f10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
         .inspector-area {
-            background: #0f1a1f;
-            border-radius: 60px;
-            padding: 12px 18px;
-            margin-bottom: 20px;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
         }
         .inspector-input {
             width: 100%;
-            padding: 16px 20px;
-            font-size: 1.4rem;
+            padding: 12px 16px;
+            font-size: 1.1rem;
             font-weight: 600;
-            background: #0a0f14;
+            background: #f5f5f5;
             border: 2px solid #f4b942;
-            border-radius: 60px;
-            color: #f0f0f0;
+            border-radius: 20px;
+            color: #333333;
             text-align: center;
             outline: none;
         }
         .message-box {
-            background: #00000077;
-            border-radius: 40px;
-            padding: 10px 12px;
-            margin-top: 18px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 8px 10px;
+            margin-top: 12px;
             text-align: center;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: bold;
-            backdrop-filter: blur(3px);
+            border: 1px solid #f0f0f0;
+            color: #333333;
         }
         .offline-hint {
             font-size: 0.7rem;
             text-align: center;
-            margin-top: 12px;
-            color: #8aaeb3;
+            margin-top: 8px;
+            color: #666666;
         }
         footer {
             font-size: 0.7rem;
             text-align: center;
-            margin-top: 18px;
-            color: #5e8288;
+            margin-top: 10px;
+            color: #888888;
         }
         @media (max-width: 500px) {
-            .app-container { padding: 14px; }
-            .grid-cards { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
-            .pest-card { font-size: 1.2rem; padding: 12px 4px; }
-            .count-digit { font-size: 2.8rem; }
-            .step-btn { font-size: 1.3rem; padding: 10px 12px; }
+            .app-container { padding: 10px; }
+            .grid-cards { grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); }
+            .pest-card { font-size: 1rem; padding: 8px 3px; }
+            .count-digit { font-size: 2.4rem; }
+            .step-btn { font-size: 1.1rem; padding: 8px 10px; min-width: 60px; }
         }
         button {
             font-family: inherit;
@@ -295,13 +355,14 @@
                 <div class="pest-card" data-type="disease" data-name="白粉病" data-multi="false">白粉病</div>
                 <div class="pest-card" data-type="disease" data-name="枝枯病" data-multi="false">枝枯病</div>
                 <div class="pest-card" data-type="disease" data-name="灰霉病" data-multi="false">灰霉病</div>
+                <div class="pest-card" data-type="disease" data-name="其他病害" data-multi="false">其他</div>
             </div>
         </div>
 
         <div class="category-block">
             <div class="category-title">❓ 未知</div>
             <div class="grid-cards">
-                <div class="pest-card unknown-card" data-type="unknown" data-name="未知症状" data-multi="false">未知症状</div>
+                <div class="pest-card unknown-card" data-type="unknown" data-name="未知症状" data-multi="false">未知</div>
             </div>
         </div>
 
@@ -331,7 +392,10 @@
         type: '',
         multiMode: false,
         counts: [0, 0, 0],
-        singleCount: 0
+        singleCount: 0,
+        otherPestName: "",
+        otherDiseaseName: "",
+        diseaseLevel: 0
     };
 
     // DOM 元素
@@ -397,7 +461,7 @@
         let pid = urlParams.get('point_id');
         if (!pid) pid = urlParams.get('pointId');
         if (pid && pid.trim() !== "") return pid.trim();
-        return "DEMO-FIELD-01";
+        return "";
     }
 
     // 离线队列
@@ -477,6 +541,36 @@
 
         if (!currentPointId) currentPointId = getPointIdFromUrl();
 
+        // 验证"其他虫害"必须填写虫害名称
+        if (currentDetail.name === "其他虫害") {
+            if (!currentDetail.otherPestName) {
+                showDetailMessage("请填写虫害名称", true);
+                const nameInput = document.getElementById('otherPestNameInput');
+                if (nameInput) nameInput.focus();
+                return false;
+            }
+        }
+
+        // 验证"其他病害"必须填写病害名称
+        if (currentDetail.name === "其他病害") {
+            if (!currentDetail.otherDiseaseName) {
+                showDetailMessage("请填写病害名称", true);
+                const nameInput = document.getElementById('otherDiseaseNameInput');
+                if (nameInput) nameInput.focus();
+                return false;
+            }
+        }
+
+        // 验证"未知症状"必须填写症状名称
+        if (currentDetail.name === "未知症状") {
+            if (!currentDetail.otherPestName) {
+                showDetailMessage("请填写症状名称", true);
+                const nameInput = document.getElementById('unknownNameInput');
+                if (nameInput) nameInput.focus();
+                return false;
+            }
+        }
+
         const now = new Date();
         const timestamp = now.toISOString();
         let pestCountValue;
@@ -493,15 +587,29 @@
             pestCountValue = currentDetail.singleCount;
         }
 
+        let pestType = currentDetail.name;
+        if (currentDetail.name === "其他虫害") {
+            pestType = currentDetail.otherPestName;
+        } else if (currentDetail.name === "其他病害") {
+            pestType = currentDetail.otherDiseaseName;
+        } else if (currentDetail.name === "未知症状") {
+            pestType = currentDetail.otherPestName;
+        }
+
         const payload = {
             point_id: currentPointId,
             inspector_name: globalInspectorName,
-            pest_type: currentDetail.name,
+            pest_type: pestType,
             category: currentDetail.type || "unknown",
             pest_count: pestCountValue,
             timestamp: timestamp,
             unix_ms: now.getTime()
         };
+
+        // 如果是病害，添加分级信息
+        if (currentDetail.type === "disease") {
+            payload.disease_level = currentDetail.diseaseLevel;
+        }
 
         if (subCounts) {
             payload.detailed_counts = subCounts;
@@ -536,6 +644,52 @@
         }
     }
 
+    // 病害分级描述 - 针对每种病害的不同标准
+    const diseaseLevelConfigs = {
+        "白粉病": [
+            "0 - 健康",
+            "1 - 轻微感染（叶面出现少量白粉）",
+            "2 - 轻度感染（30%以下叶片感染）",
+            "3 - 中度感染（30-60%叶片感染）",
+            "4 - 严重感染（60-90%叶片感染）",
+            "5 - 非常严重（超过90%叶片感染）"
+        ],
+        "枝枯病": [
+            "0 - 健康",
+            "1 - 轻微感染（个别枝条初期症状）",
+            "2 - 轻度感染（少数枝条发病）",
+            "3 - 中度感染（多条枝条发病）",
+            "4 - 严重感染（大部分枝条受害）",
+            "5 - 非常严重（植株大量死枝）"
+        ],
+        "灰霉病": [
+            "0 - 健康",
+            "1 - 轻微感染（零星花朵感染）",
+            "2 - 轻度感染（少量果实感染）",
+            "3 - 中度感染（部分花果感染）",
+            "4 - 严重感染（大量花果受害）",
+            "5 - 非常严重（花果大面积腐烂）"
+        ],
+        "其他病害": [
+            "0 - 健康",
+            "1 - 轻微感染",
+            "2 - 轻度感染",
+            "3 - 中度感染",
+            "4 - 严重感染",
+            "5 - 非常严重"
+        ]
+    };
+
+    // 病害分级描述
+    const diseaseDescriptions = [
+        "病害分级0-5占位文字代替",
+        "病害分级0-5占位文字代替",
+        "病害分级0-5占位文字代替",
+        "病害分级0-5占位文字代替",
+        "病害分级0-5占位文字代替",
+        "病害分级0-5占位文字代替"
+    ];
+
     // 渲染详情页
     function renderDetailPage(name, type, multiMode) {
         currentDetail = {
@@ -543,7 +697,10 @@
             type: type,
             multiMode: multiMode,
             counts: [0, 0, 0],
-            singleCount: 0
+            singleCount: 0,
+            otherPestName: "",
+            otherDiseaseName: "",
+            diseaseLevel: 0
         };
 
         let html = `<div class="detail-header"><div class="detail-name">🔍 ${name}</div></div>`;
@@ -564,6 +721,96 @@
                     </div>
                 `;
             }
+        } else if (name === "其他虫害") {
+            html += `
+                <div class="field-card">
+                    <div class="field-label">📝 虫害名称</div>
+                    <input type="text" id="otherPestNameInput" class="inspector-input" placeholder="请输入虫害名称" style="margin-bottom: 12px; font-size: 1rem; padding: 10px 14px;">
+                </div>
+                <div class="field-card">
+                    <div class="field-label">🐛 发生数量 (头/株/叶片)</div>
+                    <div class="count-digit" id="singleCountDisplay">0</div>
+                    <div class="btn-row">
+                        <button class="step-btn" data-step="1">+1</button>
+                        <button class="step-btn" data-step="3">+3</button>
+                        <button class="step-btn" data-step="5">+5</button>
+                        <button class="step-btn" data-step="10">+10</button>
+                        <button class="step-btn reset-btn-sm" id="resetSingleBtn">归零</button>
+                    </div>
+                </div>
+            `;
+        } else if (type === "disease") {
+            // 所有病害共有的分级功能
+            if (name === "其他病害") {
+                html += `
+                    <div class="field-card">
+                        <div class="field-label">📝 病害名称</div>
+                        <input type="text" id="otherDiseaseNameInput" class="inspector-input" placeholder="请输入病害名称" style="margin-bottom: 12px; font-size: 1rem; padding: 10px 14px;">
+                    </div>
+                `;
+            }
+            html += `
+                <div class="field-card">
+                    <div class="field-label">📊 病害分级</div>
+                    <div class="level-display" id="levelDisplay">${diseaseLevelConfigs[name] ? diseaseLevelConfigs[name][0] : diseaseDescriptions[0]}</div>
+                    <div class="level-scale" id="levelScale">
+                        <div class="level-scale-item">
+                            <div class="level-scale-tick"></div>
+                            <div>0</div>
+                        </div>
+                        <div class="level-scale-item">
+                            <div class="level-scale-tick"></div>
+                            <div>1</div>
+                        </div>
+                        <div class="level-scale-item">
+                            <div class="level-scale-tick"></div>
+                            <div>2</div>
+                        </div>
+                        <div class="level-scale-item">
+                            <div class="level-scale-tick"></div>
+                            <div>3</div>
+                        </div>
+                        <div class="level-scale-item">
+                            <div class="level-scale-tick"></div>
+                            <div>4</div>
+                        </div>
+                        <div class="level-scale-item">
+                            <div class="level-scale-tick"></div>
+                            <div>5</div>
+                        </div>
+                    </div>
+                    <input type="range" id="diseaseSlider" class="level-slider" min="0" max="5" value="0">
+                </div>
+                <div class="field-card">
+                    <div class="field-label">🐛 发生数量 (株/叶片)</div>
+                    <div class="count-digit" id="singleCountDisplay">0</div>
+                    <div class="btn-row">
+                        <button class="step-btn" data-step="1">+1</button>
+                        <button class="step-btn" data-step="3">+3</button>
+                        <button class="step-btn" data-step="5">+5</button>
+                        <button class="step-btn" data-step="10">+10</button>
+                        <button class="step-btn reset-btn-sm" id="resetSingleBtn">归零</button>
+                    </div>
+                </div>
+            `;
+        } else if (type === "unknown") {
+            html += `
+                <div class="field-card">
+                    <div class="field-label">📝 症状名称</div>
+                    <input type="text" id="unknownNameInput" class="inspector-input" placeholder="请输入症状名称" style="margin-bottom: 12px; font-size: 1rem; padding: 10px 14px;">
+                </div>
+                <div class="field-card">
+                    <div class="field-label">🐛 发生数量 (株/叶片)</div>
+                    <div class="count-digit" id="singleCountDisplay">0</div>
+                    <div class="btn-row">
+                        <button class="step-btn" data-step="1">+1</button>
+                        <button class="step-btn" data-step="3">+3</button>
+                        <button class="step-btn" data-step="5">+5</button>
+                        <button class="step-btn" data-step="10">+10</button>
+                        <button class="step-btn reset-btn-sm" id="resetSingleBtn">归零</button>
+                    </div>
+                </div>
+            `;
         } else {
             html += `
                 <div class="field-card">
@@ -604,6 +851,54 @@
         } else {
             const displaySpan = document.getElementById('singleCountDisplay');
             const updateSingle = () => { if (displaySpan) displaySpan.innerText = currentDetail.singleCount; };
+
+            // 处理"其他虫害"的名称输入
+            if (name === "其他虫害") {
+                const nameInput = document.getElementById('otherPestNameInput');
+                if (nameInput) {
+                    nameInput.oninput = (e) => {
+                        currentDetail.otherPestName = e.target.value.trim();
+                    };
+                    nameInput.focus();
+                }
+            }
+
+            // 处理病害的分级滑块
+            if (type === "disease") {
+                if (name === "其他病害") {
+                    const dishInput = document.getElementById('otherDiseaseNameInput');
+                    if (dishInput) {
+                        dishInput.oninput = (e) => {
+                            currentDetail.otherDiseaseName = e.target.value.trim();
+                        };
+                        dishInput.focus();
+                    }
+                }
+                const slider = document.getElementById('diseaseSlider');
+                const levelDisplay = document.getElementById('levelDisplay');
+                if (slider) {
+                    slider.oninput = (e) => {
+                        const level = parseInt(e.target.value, 10);
+                        currentDetail.diseaseLevel = level;
+                        if (levelDisplay) {
+                            // 获取当前病害的分级配置，如果没有则使用默认配置
+                            const config = diseaseLevelConfigs[name] || diseaseLevelConfigs["其他病害"];
+                            levelDisplay.innerText = config[level];
+                        }
+                    };
+                }
+            }
+
+            // 处理未知症状的名称输入
+            if (type === "unknown") {
+                const unknownInput = document.getElementById('unknownNameInput');
+                if (unknownInput) {
+                    unknownInput.oninput = (e) => {
+                        currentDetail.otherPestName = e.target.value.trim();
+                    };
+                    unknownInput.focus();
+                }
+            }
 
             document.querySelectorAll('#detailDynamicContent .step-btn').forEach(btn => {
                 if (btn.id === 'resetSingleBtn') {
