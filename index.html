@@ -515,6 +515,24 @@
     function savePendingQueue(queue) {
         localStorage.setItem(PENDING_KEY, JSON.stringify(queue));
     }
+    function clearExpiredPending() {
+        const queue = getPendingQueue();
+        if (queue.length === 0) return;
+        
+        const now = new Date();
+        const cutoff = now.getTime() - (24 * 60 * 60 * 1000); // 24小时前
+        
+        const filtered = queue.filter(item => {
+            // 如果有unix_ms，使用它；否则跳过
+            if (item.unix_ms && item.unix_ms > cutoff) return true;
+            return false;
+        });
+        
+        if (filtered.length !== queue.length) {
+            savePendingQueue(filtered);
+            console.log(`已清理 ${queue.length - filtered.length} 条过期离线数据`);
+        }
+    }
     function addPendingRecord(data) {
         const q = getPendingQueue();
         const recordId = generateId();
@@ -1219,6 +1237,9 @@
                 submitBatchRecords();
             };
         }
+
+        // 检查并清空过期的离线数据（超过24小时的）
+        clearExpiredPending();
 
         // Supabase 已直接连接，无需测试后端
 
