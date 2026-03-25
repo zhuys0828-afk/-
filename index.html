@@ -454,6 +454,7 @@
         setTimeout(() => {
             if (globalMsgHome && homePage.classList.contains('hidden-page') === false) {
                 globalMsgHome.innerHTML = '📋 点击任意病害/虫害开始计数';
+                globalMsgHome.style.color = '#333333';
             }
         }, 3000);
     }
@@ -464,6 +465,7 @@
         setTimeout(() => {
             if (detailMsgBox && detailPage.classList.contains('hidden-page') === false) {
                 detailMsgBox.innerHTML = '等待填写数据';
+                detailMsgBox.style.color = '#333333';
             }
         }, 3000);
     }
@@ -523,7 +525,6 @@
         const cutoff = now.getTime() - (24 * 60 * 60 * 1000); // 24小时前
         
         const filtered = queue.filter(item => {
-            // 如果有unix_ms，使用它；否则跳过
             if (item.unix_ms && item.unix_ms > cutoff) return true;
             return false;
         });
@@ -551,253 +552,29 @@
         setTimeout(() => retryAllPending(), 5000);
     }
 
-    async function submitToServer(payload) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 增加到30秒
-        try {
-            // 支持两种模式：单条点位缓存记录（wide row）或原始单条虫害/病害条目
-            let record;
-            if (payload.is_batch) {
-                record = { ...payload };
-                delete record.is_batch;
-                delete record._id;
-                delete record.created_at;
-                delete record.timestamp;
-                delete record.unix_ms;
-                delete record.pending_time;
-                delete record.raw_json;
-            } else {
-                record = {
-                    point_id: payload.point_id,
-                    inspector_name: payload.inspector_name,
-                    category: payload.category,
-                    pest_type: payload.pest_type,
-                    pest_count: payload.pest_count,
-                    disease_level: payload.disease_level || null,
-                    disease_leaf_count: payload.disease_leaf_count || null,
-                    leaf1_count: payload.detailed_counts?.leaf1 || null,
-                    leaf2_count: payload.detailed_counts?.leaf2 || null,
-                    leaf3_count: payload.detailed_counts?.leaf3 || null,
-                    raw_json: payload
-                };
-            }
-            
-            // 直接调用Supabase REST API
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/pest_collections`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
-                },
-                body: JSON.stringify(record),
-                signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
-            }
-            
-            // Supabase可能返回空响应，尝试解析JSON
-            const responseText = await response.text();
-            return responseText ? JSON.parse(responseText) : {};
-        } catch (err) {
-            clearTimeout(timeoutId);
-            throw err;
-        }
-    }
-
-    async function retryAllPending() {
-        // 防止并发重试
-        if (isRetrying) return;
-        isRetrying = true;
-        
-        try {
-            const queue = getPendingQueue();
-            if (queue.length === 0) {
-                isRetrying = false;
-                return;
-            }
-            
-            const successIds = [];
-            
-            for (let i = 0; i < queue.length; i++) {
-                const item = queue[i];
-                const recordId = item._id;
-                
-                // 跳过已经成功提交过的记录
-                if (submittedIds.has(recordId)) {
-                    successIds.push(recordId);
-                    continue;
-                }
-                
-                try {
-                    await submitToServer(item);
-                    successIds.push(recordId);
-                    submittedIds.add(recordId);
-                } catch (e) {
-                    console.warn("重传失败", e);
-                }
-            }
-            
-            if (successIds.length > 0) {
-                const newQueue = queue.filter(item => !successIds.includes(item._id));
-                savePendingQueue(newQueue);
-                if (detailPage.classList.contains('hidden-page') === false) {
-                    showDetailMessage(`📤 成功重传 ${successIds.length} 条离线数据`, false);
-                }
-            }
-        } finally {
-            isRetrying = false;
-        }
-    }
-
-    // 保存当前记录（临时缓存，不立即提交Supabase）
-    async function submitCurrentData() {
-        let inspector = globalInspectorInput.value.trim();
-        if (!inspector) {
-            showDetailMessage("请填写采集员姓名", true);
-            globalInspectorInput.focus();
-            return false;
-        }
-        globalInspectorName = inspector;
-        saveInspector(inspector);
-
-        if (!currentPointId) currentPointId = getPointIdFromUrl();
-
-        // 验证"其他虫害"必须填写虫害名称
-        if (currentDetail.name === "其他虫害") {
-            if (!currentDetail.otherPestName) {
-                showDetailMessage("请填写虫害名称", true);
-                const nameInput = document.getElementById('otherPestNameInput');
-                if (nameInput) nameInput.focus();
-                return false;
-            }
-        }
-
-        // 验证"其他病害"必须填写病害名称
-        if (currentDetail.name === "其他病害") {
-            if (!currentDetail.otherDiseaseName) {
-                showDetailMessage("请填写病害名称", true);
-                const nameInput = document.getElementById('otherDiseaseNameInput');
-                if (nameInput) nameInput.focus();
-                return false;
-            }
-        }
-
-        // 验证"未知症状"必须填写症状名称
-        if (currentDetail.name === "未知症状") {
-            if (!currentDetail.otherPestName) {
-                showDetailMessage("请填写症状名称", true);
-                const nameInput = document.getElementById('unknownNameInput');
-                if (nameInput) nameInput.focus();
-                return false;
-            }
-        }
-
-        const now = new Date();
-        // 使用本地时间而不是UTC时间
-        const timestamp = now.toLocaleString('zh-CN', { 
-            year: 'numeric', 
-            month: '2-digit', 
-            day: '2-digit', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-        }).replace(/\//g, '-').replace(',', '');
-        let pestCountValue;
-        let subCounts = null;
-
-        if (currentDetail.multiMode && currentDetail.name === "蓟马") {
-            subCounts = {
-                leaf1: currentDetail.counts[0],
-                leaf2: currentDetail.counts[1],
-                leaf3: currentDetail.counts[2]
-            };
-            pestCountValue = currentDetail.counts[0] + currentDetail.counts[1] + currentDetail.counts[2];
-        } else {
-            pestCountValue = currentDetail.singleCount;
-        }
-
-        let pestType = currentDetail.name;
-        if (currentDetail.name === "其他虫害") {
-            pestType = currentDetail.otherPestName;
-        } else if (currentDetail.name === "其他病害") {
-            pestType = currentDetail.otherDiseaseName;
-        } else if (currentDetail.name === "未知症状") {
-            pestType = currentDetail.otherPestName;
-        }
-
-        const payload = {
-            _id: generateId(),
-            point_id: currentPointId,
-            inspector_name: globalInspectorName,
-            pest_type: pestType,
-            category: currentDetail.type || "unknown",
-            pest_count: pestCountValue,
-            disease_level: currentDetail.type === "disease" ? currentDetail.diseaseLevel : null,
-            disease_leaf_count: currentDetail.type === "disease" ? currentDetail.diseaseLeafCount : null,
-            detailed_counts: subCounts,
-            timestamp: timestamp,
-            unix_ms: now.getTime()
-        };
-
-        savedRecords.push(payload);
-        renderSavedRecords();
-
-        const submitBtn = document.querySelector('#submitDetailBtn');
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerText = "✔️ 已保存";
-            setTimeout(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerText = "💾 保存记录";
-            }, 800);
-        }
-
-        showDetailMessage(`💾 已保存 ${pestType} 记录 (共 ${savedRecords.length} 条)`, false);
-
-        // 保存完自动回首页，允许继续在同一点位采集
-        setTimeout(() => showHome(), 800);
-        return true;
-    }
-
-    function renderSavedRecords() {
-        const list = document.getElementById('savedRecordsList');
-        if (!list) return;
-
-        if (savedRecords.length === 0) {
-            list.innerHTML = '目前暂无记录';
-            return;
-        }
-
-        list.innerHTML = savedRecords.map((item, index) => {
-            const title = item.category === 'disease'
-                ? `${item.pest_type} 评级${item.disease_level} 叶片${item.disease_leaf_count || 0}`
-                : `${item.pest_type} ${item.pest_count} (蓟马/蚜虫可能多叶)`;
-            return `<div class="saved-record-item">${index + 1}. ${title}</div>`;
-        }).join('');
-    }
-
+    // ========== 核心修复：正确构建宽表数据 ==========
     function buildWideRow() {
         const now = new Date();
+        // 使用本地时间字符串（东八区）
         const localTimestamp = now.toLocaleString('zh-CN', { 
+            timeZone: 'Asia/Shanghai',
             year: 'numeric', 
             month: '2-digit', 
             day: '2-digit', 
             hour: '2-digit', 
             minute: '2-digit', 
-            second: '2-digit' 
+            second: '2-digit',
+            hour12: false
         }).replace(/\//g, '-').replace(',', '');
         
+        // 初始化所有字段为 0（重要：确保没有 NULL）
         const row = {
             point_id: currentPointId,
             inspector_name: globalInspectorName,
-            raw_json: savedRecords,
+            raw_json: JSON.stringify(savedRecords),  // 保存为 JSON 字符串
             timestamp: localTimestamp,
+            unix_ms: now.getTime(),
+            // 虫害字段 - 全部初始化为 0
             thrips_1_count: 0,
             thrips_2_count: 0,
             thrips_3_count: 0,
@@ -806,69 +583,91 @@
             aphid_3_count: 0,
             red_spider_count: 0,
             green_caterpillar_count: 0,
+            // 病害字段 - 全部初始化为 0
             powdery_mildew_rating: 0,
             powdery_mildew_leaf_count: 0,
+            branch_blight_rating: 0,
+            branch_blight_leaf_count: 0,
             botrytis_rating: 0,
             botrytis_leaf_count: 0
         };
 
+        // 遍历所有保存的记录，填充到对应的字段
         savedRecords.forEach(item => {
-            if (item.category === 'pest') {
-                if (item.pest_type === '蓟马') {
+            const pestType = item.pest_type;
+            const category = item.category;
+            
+            if (category === 'pest') {
+                // 虫害处理
+                if (pestType === '蓟马') {
                     if (item.detailed_counts) {
                         row.thrips_1_count = item.detailed_counts.leaf1 || 0;
                         row.thrips_2_count = item.detailed_counts.leaf2 || 0;
                         row.thrips_3_count = item.detailed_counts.leaf3 || 0;
                     }
-                } else if (item.pest_type === '蚜虫') {
+                } else if (pestType === '蚜虫') {
                     if (item.detailed_counts) {
                         row.aphid_1_count = item.detailed_counts.leaf1 || 0;
                         row.aphid_2_count = item.detailed_counts.leaf2 || 0;
                         row.aphid_3_count = item.detailed_counts.leaf3 || 0;
                     }
-                } else if (item.pest_type === '红蜘蛛') {
+                } else if (pestType === '红蜘蛛') {
                     row.red_spider_count = item.pest_count || 0;
-                } else if (item.pest_type === '青虫') {
+                } else if (pestType === '青虫') {
                     row.green_caterpillar_count = item.pest_count || 0;
                 } else {
-                    row[`other_${item.pest_type}_count`] = item.pest_count || 0;
+                    // 其他虫害 - 可以存储到扩展字段，这里暂时用 raw_json 记录
+                    console.log('其他虫害:', pestType, item.pest_count);
                 }
-            } else if (item.category === 'disease') {
-                if (item.pest_type === '白粉病') {
+            } else if (category === 'disease') {
+                // 病害处理
+                if (pestType === '白粉病') {
                     row.powdery_mildew_rating = item.disease_level || 0;
                     row.powdery_mildew_leaf_count = item.disease_leaf_count || 0;
-                } else if (item.pest_type === '灰霉病') {
+                } else if (pestType === '枝枯病') {
+                    row.branch_blight_rating = item.disease_level || 0;
+                    row.branch_blight_leaf_count = item.disease_leaf_count || 0;
+                } else if (pestType === '灰霉病') {
                     row.botrytis_rating = item.disease_level || 0;
                     row.botrytis_leaf_count = item.disease_leaf_count || 0;
-                } else {
-                    row[`${item.pest_type}_rating`] = item.disease_level || 0;
-                    row[`${item.pest_type}_leaf_count`] = item.disease_leaf_count || 0;
                 }
+                // 其他病害的记录会保存在 raw_json 中
             }
         });
-
+        
         return row;
     }
 
     async function submitBatchRecords() {
         if (!currentPointId) {
-            showMessageHome('请先选择点位', true);
+            showMessageHome('请先选择点位（URL需要带?point_id=xxx参数）', true);
             return;
         }
+        
+        // 检查采集员姓名
+        const inspector = globalInspectorInput.value.trim();
+        if (!inspector) {
+            showMessageHome('请填写采集员姓名', true);
+            globalInspectorInput.focus();
+            return;
+        }
+        globalInspectorName = inspector;
+        saveInspector(inspector);
         
         // 检查是否已经提交过这个点位
         const submittedKey = `submitted_${currentPointId}`;
         if (localStorage.getItem(submittedKey)) {
-            showMessageHome('此点位已提交过数据，不能重复提交', true);
+            showMessageHome('此点位已提交过数据，不能重复提交。如需重新提交，请清除浏览器缓存或更换点位ID', true);
             return;
         }
         
         if (savedRecords.length === 0) {
-            showMessageHome('当前无缓存记录可提交', true);
+            showMessageHome('当前无缓存记录可提交，请先采集数据', true);
             return;
         }
 
         const row = buildWideRow();
+        console.log('准备提交的数据:', row);  // 调试用，可以查看提交的数据
 
         const submitBtn = document.getElementById('batchSubmitBtn');
         if (submitBtn) {
@@ -877,8 +676,24 @@
         }
 
         try {
-            await submitToServer({ ...row, is_batch: true });
-            showMessageHome(`✅ 已提交 ${savedRecords.length} 条数据`, false);
+            // 直接提交到 Supabase
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/pest_collections`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Prefer': 'return=minimal'  // 减少返回数据量
+                },
+                body: JSON.stringify(row)
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            
+            showMessageHome(`✅ 成功提交 ${savedRecords.length} 条数据！`, false);
             
             // 标记此点位已提交
             localStorage.setItem(submittedKey, 'true');
@@ -886,12 +701,19 @@
             // 清空所有本地数据
             savedRecords = [];
             renderSavedRecords();
-            savePendingQueue([]);
             
-            showHome();
+            // 可选：延迟一下让用户看到成功消息再刷新
+            setTimeout(() => {
+                // 清空页面缓存
+                location.reload();
+            }, 1500);
+            
         } catch (err) {
-            console.error('批量提交失败', err);
-            showMessageHome('批量提交失败，请稍后重试', true);
+            console.error('批量提交失败:', err);
+            showMessageHome(`提交失败: ${err.message}，数据已保存，稍后可重试`, true);
+            
+            // 将数据保存到离线队列
+            addPendingRecord(row);
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
@@ -936,16 +758,6 @@
         ]
     };
 
-    // 病害分级描述
-    const diseaseDescriptions = [
-        "病害分级0-5占位文字代替",
-        "病害分级0-5占位文字代替",
-        "病害分级0-5占位文字代替",
-        "病害分级0-5占位文字代替",
-        "病害分级0-5占位文字代替",
-        "病害分级0-5占位文字代替"
-    ];
-
     // 渲染详情页
     function renderDetailPage(name, type, multiMode) {
         currentDetail = {
@@ -956,7 +768,8 @@
             singleCount: 0,
             otherPestName: "",
             otherDiseaseName: "",
-            diseaseLevel: 0
+            diseaseLevel: 0,
+            diseaseLeafCount: 0
         };
 
         let html = `<div class="detail-header"><div class="detail-name">🔍 ${name}</div></div>`;
@@ -1007,55 +820,26 @@
             }
             html += `
                 <div class="field-card">
-                    <div class="field-label">📊 病害分级</div>
-                    <div class="level-display" id="levelDisplay">${diseaseLevelConfigs[name] ? diseaseLevelConfigs[name][0] : diseaseDescriptions[0]}</div>
-                    <div class="level-scale" id="levelScale">
-                        <div class="level-scale-item">
-                            <div class="level-scale-tick"></div>
-                            <div>0</div>
-                        </div>
-                        <div class="level-scale-item">
-                            <div class="level-scale-tick"></div>
-                            <div>1</div>
-                        </div>
-                        <div class="level-scale-item">
-                            <div class="level-scale-tick"></div>
-                            <div>2</div>
-                        </div>
-                        <div class="level-scale-item">
-                            <div class="level-scale-tick"></div>
-                            <div>3</div>
-                        </div>
-                        <div class="level-scale-item">
-                            <div class="level-scale-tick"></div>
-                            <div>4</div>
-                        </div>
-                        <div class="level-scale-item">
-                            <div class="level-scale-tick"></div>
-                            <div>5</div>
-                        </div>
+                    <div class="field-label">📊 病害分级 (0-5级)</div>
+                    <div class="level-display" id="levelDisplay">${diseaseLevelConfigs[name] ? diseaseLevelConfigs[name][0] : diseaseLevelConfigs["其他病害"][0]}</div>
+                    <input type="range" id="diseaseSlider" class="level-slider" min="0" max="5" value="0" step="1">
+                    <div class="level-scale">
+                        <div class="level-scale-item">0级</div>
+                        <div class="level-scale-item">1级</div>
+                        <div class="level-scale-item">2级</div>
+                        <div class="level-scale-item">3级</div>
+                        <div class="level-scale-item">4级</div>
+                        <div class="level-scale-item">5级</div>
                     </div>
-                    <input type="range" id="diseaseSlider" class="level-slider" min="0" max="5" value="0">
                 </div>
                 <div class="field-card">
-                    <div class="field-label">🍃 叶片数量</div>
+                    <div class="field-label">🍃 发病叶片/枝条数量</div>
                     <div class="count-digit" id="diseaseLeafCountDisplay">0</div>
                     <div class="btn-row">
                         <button class="step-btn" data-disease-leaf-step="1">+1</button>
                         <button class="step-btn" data-disease-leaf-step="3">+3</button>
                         <button class="step-btn" data-disease-leaf-step="5">+5</button>
                         <button class="step-btn reset-btn-sm" id="resetDiseaseLeafBtn">归零</button>
-                    </div>
-                </div>
-                <div class="field-card">
-                    <div class="field-label">🐛 发生数量 (株/叶片)</div>
-                    <div class="count-digit" id="singleCountDisplay">0</div>
-                    <div class="btn-row">
-                        <button class="step-btn" data-step="1">+1</button>
-                        <button class="step-btn" data-step="3">+3</button>
-                        <button class="step-btn" data-step="5">+5</button>
-                        <button class="step-btn" data-step="10">+10</button>
-                        <button class="step-btn reset-btn-sm" id="resetSingleBtn">归零</button>
                     </div>
                 </div>
             `;
@@ -1092,10 +876,10 @@
                 </div>
             `;
         }
-        html += `<button id="submitDetailBtn" class="submit-btn-large">  保存记录</button>`;
+        html += `<button id="submitDetailBtn" class="submit-btn-large">💾 保存记录</button>`;
         detailDynamic.innerHTML = html;
 
-        // 绑定事件
+        // 绑定事件（保持不变）
         if (multiMode && (name === "蓟马" || name === "蚜虫")) {
             for (let i = 0; i < 3; i++) {
                 const updateDisplay = () => {
@@ -1118,26 +902,18 @@
             const displaySpan = document.getElementById('singleCountDisplay');
             const updateSingle = () => { if (displaySpan) displaySpan.innerText = currentDetail.singleCount; };
 
-            // 处理"其他虫害"的名称输入
             if (name === "其他虫害") {
                 const nameInput = document.getElementById('otherPestNameInput');
                 if (nameInput) {
-                    nameInput.oninput = (e) => {
-                        currentDetail.otherPestName = e.target.value.trim();
-                    };
-                    nameInput.focus();
+                    nameInput.oninput = (e) => { currentDetail.otherPestName = e.target.value.trim(); };
                 }
             }
 
-            // 处理病害的分级滑块
             if (type === "disease") {
                 if (name === "其他病害") {
                     const dishInput = document.getElementById('otherDiseaseNameInput');
                     if (dishInput) {
-                        dishInput.oninput = (e) => {
-                            currentDetail.otherDiseaseName = e.target.value.trim();
-                        };
-                        dishInput.focus();
+                        dishInput.oninput = (e) => { currentDetail.otherDiseaseName = e.target.value.trim(); };
                     }
                 }
                 const slider = document.getElementById('diseaseSlider');
@@ -1147,14 +923,12 @@
                         const level = parseInt(e.target.value, 10);
                         currentDetail.diseaseLevel = level;
                         if (levelDisplay) {
-                            // 获取当前病害的分级配置，如果没有则使用默认配置
                             const config = diseaseLevelConfigs[name] || diseaseLevelConfigs["其他病害"];
                             levelDisplay.innerText = config[level];
                         }
                     };
                 }
 
-                // 叶片数量控制（病害专用）
                 const leafDisplay = document.getElementById('diseaseLeafCountDisplay');
                 const updateLeaf = () => { if (leafDisplay) leafDisplay.innerText = currentDetail.diseaseLeafCount; };
                 document.querySelectorAll('[data-disease-leaf-step]').forEach(btn => {
@@ -1176,14 +950,10 @@
                 updateLeaf();
             }
 
-            // 处理未知症状的名称输入
             if (type === "unknown") {
                 const unknownInput = document.getElementById('unknownNameInput');
                 if (unknownInput) {
-                    unknownInput.oninput = (e) => {
-                        currentDetail.otherPestName = e.target.value.trim();
-                    };
-                    unknownInput.focus();
+                    unknownInput.oninput = (e) => { currentDetail.otherPestName = e.target.value.trim(); };
                 }
             }
 
@@ -1209,6 +979,194 @@
                 e.preventDefault();
                 await submitCurrentData();
             };
+        }
+    }
+
+    // 保存当前记录（临时缓存，不立即提交Supabase）
+    async function submitCurrentData() {
+        let inspector = globalInspectorInput.value.trim();
+        if (!inspector) {
+            showDetailMessage("请填写采集员姓名", true);
+            globalInspectorInput.focus();
+            return false;
+        }
+        globalInspectorName = inspector;
+        saveInspector(inspector);
+
+        if (!currentPointId) currentPointId = getPointIdFromUrl();
+
+        // 验证"其他虫害"必须填写虫害名称
+        if (currentDetail.name === "其他虫害") {
+            if (!currentDetail.otherPestName) {
+                showDetailMessage("请填写虫害名称", true);
+                const nameInput = document.getElementById('otherPestNameInput');
+                if (nameInput) nameInput.focus();
+                return false;
+            }
+        }
+
+        if (currentDetail.name === "其他病害") {
+            if (!currentDetail.otherDiseaseName) {
+                showDetailMessage("请填写病害名称", true);
+                const nameInput = document.getElementById('otherDiseaseNameInput');
+                if (nameInput) nameInput.focus();
+                return false;
+            }
+        }
+
+        if (currentDetail.name === "未知症状") {
+            if (!currentDetail.otherPestName) {
+                showDetailMessage("请填写症状名称", true);
+                const nameInput = document.getElementById('unknownNameInput');
+                if (nameInput) nameInput.focus();
+                return false;
+            }
+        }
+
+        const now = new Date();
+        const timestamp = now.toLocaleString('zh-CN', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        }).replace(/\//g, '-').replace(',', '');
+        
+        let pestCountValue;
+        let subCounts = null;
+
+        if (currentDetail.multiMode && (currentDetail.name === "蓟马" || currentDetail.name === "蚜虫")) {
+            subCounts = {
+                leaf1: currentDetail.counts[0],
+                leaf2: currentDetail.counts[1],
+                leaf3: currentDetail.counts[2]
+            };
+            pestCountValue = currentDetail.counts[0] + currentDetail.counts[1] + currentDetail.counts[2];
+        } else {
+            pestCountValue = currentDetail.singleCount;
+        }
+
+        let pestType = currentDetail.name;
+        if (currentDetail.name === "其他虫害") {
+            pestType = currentDetail.otherPestName;
+        } else if (currentDetail.name === "其他病害") {
+            pestType = currentDetail.otherDiseaseName;
+        } else if (currentDetail.name === "未知症状") {
+            pestType = currentDetail.otherPestName;
+        }
+
+        const payload = {
+            _id: generateId(),
+            point_id: currentPointId,
+            inspector_name: globalInspectorName,
+            pest_type: pestType,
+            category: currentDetail.type || "unknown",
+            pest_count: pestCountValue,
+            disease_level: currentDetail.type === "disease" ? currentDetail.diseaseLevel : 0,
+            disease_leaf_count: currentDetail.type === "disease" ? currentDetail.diseaseLeafCount : 0,
+            detailed_counts: subCounts,
+            timestamp: timestamp,
+            unix_ms: now.getTime()
+        };
+
+        savedRecords.push(payload);
+        renderSavedRecords();
+
+        const submitBtn = document.querySelector('#submitDetailBtn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "✔️ 已保存";
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "💾 保存记录";
+            }, 800);
+        }
+
+        showDetailMessage(`💾 已保存 ${pestType} 记录 (共 ${savedRecords.length} 条)`, false);
+
+        setTimeout(() => showHome(), 800);
+        return true;
+    }
+
+    function renderSavedRecords() {
+        const list = document.getElementById('savedRecordsList');
+        if (!list) return;
+
+        if (savedRecords.length === 0) {
+            list.innerHTML = '目前暂无记录';
+            return;
+        }
+
+        list.innerHTML = savedRecords.map((item, index) => {
+            let title = '';
+            if (item.category === 'disease') {
+                title = `${item.pest_type} | 评级:${item.disease_level}级 | 叶片:${item.disease_leaf_count || 0}`;
+            } else if (item.category === 'pest') {
+                if (item.detailed_counts) {
+                    title = `${item.pest_type} | 三叶合计:${item.pest_count} (${item.detailed_counts.leaf1}/${item.detailed_counts.leaf2}/${item.detailed_counts.leaf3})`;
+                } else {
+                    title = `${item.pest_type} | 数量:${item.pest_count}`;
+                }
+            } else {
+                title = `${item.pest_type} | 数量:${item.pest_count}`;
+            }
+            return `<div class="saved-record-item">${index + 1}. ${title}</div>`;
+        }).join('');
+    }
+
+    async function retryAllPending() {
+        if (isRetrying) return;
+        isRetrying = true;
+        
+        try {
+            const queue = getPendingQueue();
+            if (queue.length === 0) {
+                isRetrying = false;
+                return;
+            }
+            
+            const successIds = [];
+            
+            for (let i = 0; i < queue.length; i++) {
+                const item = queue[i];
+                const recordId = item._id;
+                
+                if (submittedIds.has(recordId)) {
+                    successIds.push(recordId);
+                    continue;
+                }
+                
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/pest_collections`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        },
+                        body: JSON.stringify(item),
+                        signal: AbortSignal.timeout(30000)
+                    });
+                    
+                    if (response.ok) {
+                        successIds.push(recordId);
+                        submittedIds.add(recordId);
+                    }
+                } catch (e) {
+                    console.warn("重传失败", e);
+                }
+            }
+            
+            if (successIds.length > 0) {
+                const newQueue = queue.filter(item => !successIds.includes(item._id));
+                savePendingQueue(newQueue);
+                if (detailPage.classList.contains('hidden-page') === false) {
+                    showDetailMessage(`📤 成功重传 ${successIds.length} 条离线数据`, false);
+                }
+            }
+        } finally {
+            isRetrying = false;
         }
     }
 
@@ -1245,15 +1203,20 @@
 
     // 初始化
     function init() {
-        // 每次刷新时清空所有本地存储
-        localStorage.clear();
+        // 不清除所有存储，保留已提交标记
+        // localStorage.clear();  // 注释掉这行，保留已提交标记
         
         currentPointId = getPointIdFromUrl();
-        homePointSpan.innerHTML = `🌾 ${currentPointId}`;
-        detailPointSpan.innerHTML = currentPointId;
+        if (!currentPointId) {
+            // 如果没有点位ID，显示提示
+            homePointSpan.innerHTML = `🌾 未设置点位`;
+            showMessageHome('请在URL中添加参数 ?point_id=点位名称', true);
+        } else {
+            homePointSpan.innerHTML = `🌾 ${currentPointId}`;
+        }
+        detailPointSpan.innerHTML = currentPointId || '未设置';
         loadInspector();
 
-        // 姓名自动保存
         globalInspectorInput.oninput = (e) => {
             const val = e.target.value.trim();
             if (val) saveInspector(val);
@@ -1270,8 +1233,6 @@
                 submitBatchRecords();
             };
         }
-
-        // Supabase 已直接连接，无需测试后端
 
         showHome();
     }
