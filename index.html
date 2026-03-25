@@ -518,7 +518,16 @@
     function addPendingRecord(data) {
         const q = getPendingQueue();
         const recordId = generateId();
-        q.push({ ...data, pending_time: new Date().toISOString(), _id: recordId });
+        const now = new Date();
+        const localTime = now.toLocaleString('zh-CN', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        }).replace(/\//g, '-').replace(',', '');
+        q.push({ ...data, pending_time: localTime, _id: recordId });
         savePendingQueue(q);
         showDetailMessage(`⚠️ 网络异常，数据已本地暂存 (待传${q.length}条)`, true);
         setTimeout(() => retryAllPending(), 5000);
@@ -670,7 +679,15 @@
         }
 
         const now = new Date();
-        const timestamp = now.toISOString();
+        // 使用本地时间而不是UTC时间
+        const timestamp = now.toLocaleString('zh-CN', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        }).replace(/\//g, '-').replace(',', '');
         let pestCountValue;
         let subCounts = null;
 
@@ -821,6 +838,8 @@
             showMessageHome(`✅ 已提交 ${savedRecords.length} 条数据`, false);
             savedRecords = [];
             renderSavedRecords();
+            // 清空离线队列，避免重复提交旧数据
+            savePendingQueue([]);
             showHome();
         } catch (err) {
             console.error('批量提交失败', err);
@@ -1025,7 +1044,7 @@
                 </div>
             `;
         }
-        html += `<button id="submitDetailBtn" class="submit-btn-large">  保存记录</button>`;
+        html += `<button id="submitDetailBtn" class="submit-btn-large">� 保存记录</button>`;
         detailDynamic.innerHTML = html;
 
         // 绑定事件
