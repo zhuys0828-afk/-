@@ -553,7 +553,7 @@
 
     async function submitToServer(payload) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 增加到30秒
         try {
             // 支持两种模式：单条点位缓存记录（wide row）或原始单条虫害/病害条目
             let record;
@@ -601,7 +601,9 @@
                 throw new Error(`HTTP ${response.status}: ${errorText}`);
             }
             
-            return await response.json();
+            // Supabase可能返回空响应，尝试解析JSON
+            const responseText = await response.text();
+            return responseText ? JSON.parse(responseText) : {};
         } catch (err) {
             clearTimeout(timeoutId);
             throw err;
@@ -781,51 +783,66 @@
     }
 
     function buildWideRow() {
+        const now = new Date();
+        const localTimestamp = now.toLocaleString('zh-CN', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        }).replace(/\//g, '-').replace(',', '');
+        
         const row = {
             point_id: currentPointId,
             inspector_name: globalInspectorName,
             raw_json: savedRecords,
-            thrips_1_count: null,
-            thrips_2_count: null,
-            thrips_3_count: null,
-            aphid_1_count: null,
-            aphid_2_count: null,
-            aphid_3_count: null,
-            red_spider_count: null,
-            green_caterpillar_count: null,
-            powdery_mildew_rating: null,
-            powdery_mildew_leaf_count: null,
-            botrytis_rating: null,
-            botrytis_leaf_count: null
+            timestamp: localTimestamp,
+            thrips_1_count: 0,
+            thrips_2_count: 0,
+            thrips_3_count: 0,
+            aphid_1_count: 0,
+            aphid_2_count: 0,
+            aphid_3_count: 0,
+            red_spider_count: 0,
+            green_caterpillar_count: 0,
+            powdery_mildew_rating: 0,
+            powdery_mildew_leaf_count: 0,
+            botrytis_rating: 0,
+            botrytis_leaf_count: 0
         };
-
-        const pestCount = { '蓟马': 0, '蚜虫': 0 };
 
         savedRecords.forEach(item => {
             if (item.category === 'pest') {
                 if (item.pest_type === '蓟马') {
-                    const idx = ++pestCount['蓟马'];
-                    if (idx <= 3) row[`thrips_${idx}_count`] = item.pest_count;
+                    if (item.detailed_counts) {
+                        row.thrips_1_count = item.detailed_counts.leaf1 || 0;
+                        row.thrips_2_count = item.detailed_counts.leaf2 || 0;
+                        row.thrips_3_count = item.detailed_counts.leaf3 || 0;
+                    }
                 } else if (item.pest_type === '蚜虫') {
-                    const idx = ++pestCount['蚜虫'];
-                    if (idx <= 3) row[`aphid_${idx}_count`] = item.pest_count;
+                    if (item.detailed_counts) {
+                        row.aphid_1_count = item.detailed_counts.leaf1 || 0;
+                        row.aphid_2_count = item.detailed_counts.leaf2 || 0;
+                        row.aphid_3_count = item.detailed_counts.leaf3 || 0;
+                    }
                 } else if (item.pest_type === '红蜘蛛') {
-                    row.red_spider_count = item.pest_count;
+                    row.red_spider_count = item.pest_count || 0;
                 } else if (item.pest_type === '青虫') {
-                    row.green_caterpillar_count = item.pest_count;
+                    row.green_caterpillar_count = item.pest_count || 0;
                 } else {
-                    row[`other_${item.pest_type}_count`] = item.pest_count;
+                    row[`other_${item.pest_type}_count`] = item.pest_count || 0;
                 }
             } else if (item.category === 'disease') {
                 if (item.pest_type === '白粉病') {
-                    row.powdery_mildew_rating = item.disease_level;
-                    row.powdery_mildew_leaf_count = item.disease_leaf_count || item.pest_count;
+                    row.powdery_mildew_rating = item.disease_level || 0;
+                    row.powdery_mildew_leaf_count = item.disease_leaf_count || 0;
                 } else if (item.pest_type === '灰霉病') {
-                    row.botrytis_rating = item.disease_level;
-                    row.botrytis_leaf_count = item.disease_leaf_count || item.pest_count;
+                    row.botrytis_rating = item.disease_level || 0;
+                    row.botrytis_leaf_count = item.disease_leaf_count || 0;
                 } else {
-                    row[`${item.pest_type}_rating`] = item.disease_level;
-                    row[`${item.pest_type}_leaf_count`] = item.disease_leaf_count || item.pest_count;
+                    row[`${item.pest_type}_rating`] = item.disease_level || 0;
+                    row[`${item.pest_type}_leaf_count`] = item.disease_leaf_count || 0;
                 }
             }
         });
@@ -1075,7 +1092,7 @@
                 </div>
             `;
         }
-        html += `<button id="submitDetailBtn" class="submit-btn-large">� 保存记录</button>`;
+        html += `<button id="submitDetailBtn" class="submit-btn-large">  保存记录</button>`;
         detailDynamic.innerHTML = html;
 
         // 绑定事件
