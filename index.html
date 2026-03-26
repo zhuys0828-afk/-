@@ -742,6 +742,7 @@
             unix_ms: now.getTime()
         };
 
+        console.log('submitCurrentData payload', payload);
         savedRecords.push(payload);
         renderSavedRecords();
 
@@ -751,7 +752,7 @@
             submitBtn.innerText = "✔️ 已保存";
             setTimeout(() => {
                 submitBtn.disabled = false;
-                submitBtn.innerText = "💾 保存记录";
+                submitBtn.innerText = "保存记录";
             }, 800);
         }
 
@@ -1071,7 +1072,7 @@
                 </div>
             `;
         }
-        html += `<button id="submitDetailBtn" class="submit-btn-large">� 保存记录</button>`;
+        html += `<button id="submitDetailBtn" class="submit-btn-large">保存记录</button>`;
         detailDynamic.innerHTML = html;
 
         // 绑定事件
