@@ -329,6 +329,29 @@
             font-size: 0.85rem;
             color: #333333;
         }
+        /* 蓟马/蚜虫三枝条页再紧凑一些，减少上下滑动 */
+        #detailPage .stepper-item {
+            margin-bottom: 8px;
+        }
+        #detailPage .stepper-item .field-label {
+            margin-bottom: 4px;
+            font-size: 0.98rem;
+        }
+        #detailPage .stepper-item .count-digit {
+            font-size: 2.2rem;
+            padding: 6px;
+            margin: 4px 0;
+            letter-spacing: 2px;
+        }
+        #detailPage .stepper-item .btn-row {
+            margin-top: 4px;
+            gap: 6px;
+        }
+        #detailPage .stepper-item .step-btn {
+            padding: 6px 10px;
+            font-size: 1.05rem;
+            min-width: 54px;
+        }
         footer {
             font-size: 0.7rem;
             text-align: center;
@@ -348,42 +371,6 @@
         .loading {
             opacity: 0.6;
             pointer-events: none;
-        }
-        /* 详情页紧凑布局，减少上下滑动 */
-        #detailPage .detail-header {
-            margin-bottom: 8px;
-        }
-        #detailPage .detail-name {
-            font-size: 1.7rem;
-            padding: 6px 16px;
-        }
-        #detailPage .field-card {
-            padding: 10px 12px;
-            margin-bottom: 10px;
-        }
-        #detailPage .field-label {
-            margin-bottom: 6px;
-            font-size: 1rem;
-        }
-        #detailPage .count-digit {
-            font-size: 2.4rem;
-            padding: 6px;
-            margin: 4px 0;
-            letter-spacing: 2px;
-        }
-        #detailPage .btn-row {
-            gap: 6px;
-            margin-top: 6px;
-        }
-        #detailPage .step-btn {
-            font-size: 1.05rem;
-            padding: 6px 10px;
-            min-width: 56px;
-        }
-        #detailPage .submit-btn-large {
-            font-size: 1.45rem;
-            padding: 12px;
-            margin-top: 2px;
         }
     </style>
 </head>
@@ -426,17 +413,14 @@
                 <div class="pest-card unknown-card" data-type="unknown" data-name="未知症状" data-multi="false">未知</div>
             </div>
         </div>
-
-
-        <div class="message-box" id="globalMsgHome">📋 点击任意病害/虫害开始计数</div>
-        <div style="display:flex; justify-content:center; margin-top:10px;">
-            <button id="batchSubmitBtn" class="step-btn" style="max-width:420px; width:100%; background:#f4b942; color:#1e2a2e;">📤 一键提交当前点位全部记录</button>
-        </div>
         <div class="saved-records-box" id="savedRecordsArea">
+            <button id="batchSubmitBtn" class="step-btn" style="display:inline-flex; align-items:center; justify-content:center; text-align:center; width:100%; background:#f4b942; color:#1e2a2e;font-size: 22px; font-weight: bold">提交当前固定点全部监测记录</button>
             <div class="field-label" style="margin-bottom:6px;">💾 已保存记录</div>
             <div id="savedRecordsList" class="saved-record-list">目前暂无记录</div>
         </div>
-        <footer>⚡ 大按钮 · 离线缓存 · 减少滑动</footer>
+        <div style="display:flex; justify-content:center; margin-top:8px;">
+        </div>
+        <footer>Author: 诸允升 Curtis Zhu[ curtis.zhu@driscolls.com ]</footer>
     </div>
 
     <!-- 详情页 -->
@@ -571,23 +555,18 @@
             console.log(`已清理 ${queue.length - filtered.length} 条过期离线数据`);
         }
     }
-
-    function getPhoneLocalTimestamp() {
-        const now = new Date();
-        const pad = (v) => String(v).padStart(2, '0');
-        const y = now.getFullYear();
-        const m = pad(now.getMonth() + 1);
-        const d = pad(now.getDate());
-        const h = pad(now.getHours());
-        const min = pad(now.getMinutes());
-        const s = pad(now.getSeconds());
-        return `${y}-${m}-${d} ${h}:${min}:${s}`;
-    }
-
     function addPendingRecord(data) {
         const q = getPendingQueue();
         const recordId = generateId();
-        const localTime = getPhoneLocalTimestamp();
+        const now = new Date();
+        const localTime = now.toLocaleString('zh-CN', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        }).replace(/\//g, '-').replace(',', '');
         q.push({ ...data, pending_time: localTime, _id: recordId });
         savePendingQueue(q);
         showDetailMessage(`⚠️ 网络异常，数据已本地暂存 (待传${q.length}条)`, true);
@@ -645,8 +624,11 @@
             }
             
             // Supabase可能返回空响应，尝试解析JSON
-            const responseText = await response.text();
-            return responseText ? JSON.parse(responseText) : {};
+            if (response.status === 201 || response.status === 200) {
+    return { success: true }; 
+}
+const responseText = await response.text();
+return responseText ? JSON.parse(responseText) : {};
         } catch (err) {
             clearTimeout(timeoutId);
             throw err;
@@ -742,11 +724,19 @@
         }
 
         const now = new Date();
-        const timestamp = getPhoneLocalTimestamp();
+        // 使用本地时间而不是UTC时间
+        const timestamp = now.toLocaleString('zh-CN', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        }).replace(/\//g, '-').replace(',', '');
         let pestCountValue;
         let subCounts = null;
 
-        if (currentDetail.multiMode && (currentDetail.name === "蓟马" || currentDetail.name === "蚜虫")) {
+        if (currentDetail.multiMode && currentDetail.name === "蓟马") {
             subCounts = {
                 leaf1: currentDetail.counts[0],
                 leaf2: currentDetail.counts[1],
@@ -780,7 +770,6 @@
             unix_ms: now.getTime()
         };
 
-        console.log('submitCurrentData payload', payload);
         savedRecords.push(payload);
         renderSavedRecords();
 
@@ -790,7 +779,7 @@
             submitBtn.innerText = "✔️ 已保存";
             setTimeout(() => {
                 submitBtn.disabled = false;
-                submitBtn.innerText = "保存记录";
+                submitBtn.innerText = "💾 保存记录";
             }, 800);
         }
 
@@ -819,7 +808,15 @@
     }
 
     function buildWideRow() {
-        const localTimestamp = getPhoneLocalTimestamp();
+        const now = new Date();
+        const localTimestamp = now.toLocaleString('zh-CN', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        }).replace(/\//g, '-').replace(',', '');
         
         const row = {
             point_id: currentPointId,
@@ -884,6 +881,13 @@
             return;
         }
         
+        // 检查是否已经提交过这个点位
+        const submittedKey = `submitted_${currentPointId}`;
+        if (localStorage.getItem(submittedKey)) {
+            showMessageHome('此点位已提交过数据，不能重复提交', true);
+            return;
+        }
+        
         if (savedRecords.length === 0) {
             showMessageHome('当前无缓存记录可提交', true);
             return;
@@ -900,6 +904,9 @@
         try {
             await submitToServer({ ...row, is_batch: true });
             showMessageHome(`✅ 已提交 ${savedRecords.length} 条数据`, false);
+            
+            // 标记此点位已提交
+            localStorage.setItem(submittedKey, 'true');
             
             // 清空所有本地数据
             savedRecords = [];
@@ -1000,7 +1007,7 @@
             html += `
                 <div class="field-card">
                     <div class="field-label">📝 虫害名称</div>
-                    <input type="text" id="otherPestNameInput" class="inspector-input" placeholder="请输入虫害名称" style="margin-bottom: 8px; font-size: 1rem; padding: 8px 12px;">
+                    <input type="text" id="otherPestNameInput" class="inspector-input" placeholder="请输入虫害名称" style="margin-bottom: 12px; font-size: 1rem; padding: 10px 14px;">
                 </div>
                 <div class="field-card">
                     <div class="field-label">🐛 发生数量 (头/株/叶片)</div>
@@ -1020,7 +1027,7 @@
                 html += `
                     <div class="field-card">
                         <div class="field-label">📝 病害名称</div>
-                        <input type="text" id="otherDiseaseNameInput" class="inspector-input" placeholder="请输入病害名称" style="margin-bottom: 8px; font-size: 1rem; padding: 8px 12px;">
+                        <input type="text" id="otherDiseaseNameInput" class="inspector-input" placeholder="请输入病害名称" style="margin-bottom: 12px; font-size: 1rem; padding: 10px 14px;">
                     </div>
                 `;
             }
@@ -1082,7 +1089,7 @@
             html += `
                 <div class="field-card">
                     <div class="field-label">📝 症状名称</div>
-                    <input type="text" id="unknownNameInput" class="inspector-input" placeholder="请输入症状名称" style="margin-bottom: 8px; font-size: 1rem; padding: 8px 12px;">
+                    <input type="text" id="unknownNameInput" class="inspector-input" placeholder="请输入症状名称" style="margin-bottom: 12px; font-size: 1rem; padding: 10px 14px;">
                 </div>
                 <div class="field-card">
                     <div class="field-label">🐛 发生数量 (株/叶片)</div>
@@ -1111,7 +1118,7 @@
                 </div>
             `;
         }
-        html += `<button id="submitDetailBtn" class="submit-btn-large">保存记录</button>`;
+        html += `<button id="submitDetailBtn" class="submit-btn-large">  保存记录</button>`;
         detailDynamic.innerHTML = html;
 
         // 绑定事件
@@ -1175,12 +1182,17 @@
 
                 // 叶片数量控制（病害专用）
                 const leafDisplay = document.getElementById('diseaseLeafCountDisplay');
-                const updateLeaf = () => { if (leafDisplay) leafDisplay.innerText = currentDetail.diseaseLeafCount; };
+                const updateLeaf = () => {
+                    const safeLeaf = Number(currentDetail.diseaseLeafCount);
+                    currentDetail.diseaseLeafCount = Number.isFinite(safeLeaf) ? safeLeaf : 0;
+                    if (leafDisplay) leafDisplay.innerText = currentDetail.diseaseLeafCount;
+                };
                 document.querySelectorAll('[data-disease-leaf-step]').forEach(btn => {
                     const step = parseInt(btn.getAttribute('data-disease-leaf-step'), 10);
                     if (!isNaN(step)) {
                         btn.onclick = () => {
-                            currentDetail.diseaseLeafCount = Math.min(999, currentDetail.diseaseLeafCount + step);
+                            const base = Number(currentDetail.diseaseLeafCount);
+                            currentDetail.diseaseLeafCount = Math.min(999, (Number.isFinite(base) ? base : 0) + step);
                             updateLeaf();
                         };
                     }
