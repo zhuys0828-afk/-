@@ -489,6 +489,7 @@
     // Supabase 配置 - 直接连接数据库
     const SUPABASE_URL = 'https://rkzmlpopbdcbwwjmmoir.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJrem1scG9wYmRjYnd3am1tb2lyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNzc1MTgsImV4cCI6MjA4OTg1MzUxOH0.JpRey9c3FwmYp7ekYLp265ChjoU3Z7cOPsbaBUvH6-A';
+    const SUPABASE_TABLE = encodeURIComponent('病虫害采集记录');
 
     // 显示消息
     function showMessageHome(msg, isError = false) {
@@ -596,44 +597,33 @@
 
     async function submitToServer(payload) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 增加到30秒
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
         try {
-            // 支持两种模式：单条点位缓存记录（wide row）或原始单条虫害/病害条目
             let record;
             if (payload.is_batch) {
                 record = { ...payload };
                 delete record.is_batch;
                 delete record._id;
-                record.created_at = payload.timestamp;
+                record["采集时间"] = payload.timestamp;
                 delete record.timestamp;
                 delete record.unix_ms;
                 delete record.pending_time;
-                delete record.raw_json;
             } else {
                 record = {
-                    point_id: payload.point_id,
-                    inspector_name: payload.inspector_name,
-                    category: payload.category,
-                    pest_type: payload.pest_type,
-                    pest_count: payload.pest_count,
-                    disease_level: payload.disease_level || null,
-                    disease_leaf_count: payload.disease_leaf_count || null,
-                    male_spotted_wing_drosophila_count: payload.male_spotted_wing_drosophila_count || null,
-                    leaf1_count: payload.detailed_counts?.leaf1 || null,
-                    leaf2_count: payload.detailed_counts?.leaf2 || null,
-                    leaf3_count: payload.detailed_counts?.leaf3 || null,
-                    created_at: payload.timestamp,
-                    raw_json: payload
+                    "点位ID": payload.point_id,
+                    "采集员姓名": payload.inspector_name,
+                    "采集时间": payload.timestamp,
+                    "原始JSON": payload
                 };
             }
             
-            // 直接调用Supabase REST API
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/病虫害采集记录`, {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Prefer': 'return=representation'
                 },
                 body: JSON.stringify(record),
                 signal: controller.signal
@@ -641,17 +631,12 @@
             
             clearTimeout(timeoutId);
             
+            const text = await response.text();
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
+                throw new Error(`HTTP ${response.status}: ${text}`);
             }
             
-            // Supabase可能返回空响应，尝试解析JSON
-            if (response.status === 201 || response.status === 200) {
-    return { success: true }; 
-}
-const responseText = await response.text();
-return responseText ? JSON.parse(responseText) : {};
+            return text ? JSON.parse(text) : { success: true };
         } catch (err) {
             clearTimeout(timeoutId);
             throw err;
@@ -868,76 +853,92 @@ return responseText ? JSON.parse(responseText) : {};
         }).replace(/\//g, '-').replace(',', '');
         
         const row = {
-            point_id: currentPointId,
-            inspector_name: globalInspectorName,
-            raw_json: savedRecords,
+            "点位ID": currentPointId,
+            "采集员姓名": globalInspectorName,
+            "原始JSON": savedRecords,
             timestamp: localTimestamp,
-            thrips_1_count: 0,
-            thrips_2_count: 0,
-            thrips_3_count: 0,
-            aphid_1_count: 0,
-            aphid_2_count: 0,
-            aphid_3_count: 0,
-            broad_mite_1_count: 0,
-            broad_mite_2_count: 0,
-            broad_mite_3_count: 0,
-            spider_mite_1_count: 0,
-            spider_mite_2_count: 0,
-            spider_mite_3_count: 0,
-            green_caterpillar_count: 0,
-            fruit_fly_count: 0,
-            male_spotted_wing_drosophila_count: 0,
-            powdery_mildew_rating: 0,
-            powdery_mildew_leaf_count: 0,
-            botrytis_rating: 0,
-            botrytis_leaf_count: 0
+
+            "蓟马_第1叶": 0,
+            "蓟马_第2叶": 0,
+            "蓟马_第3叶": 0,
+
+            "蚜虫_第1叶": 0,
+            "蚜虫_第2叶": 0,
+            "蚜虫_第3叶": 0,
+
+            "茶黄螨_第1叶": 0,
+            "茶黄螨_第2叶": 0,
+            "茶黄螨_第3叶": 0,
+
+            "红蜘蛛_第1叶": 0,
+            "红蜘蛛_第2叶": 0,
+            "红蜘蛛_第3叶": 0,
+
+            "青虫数量": 0,
+            "果蝇总数": 0,
+            "雄性斑翅果蝇数量": 0,
+
+            "白粉病评级": 0,
+            "白粉病叶片数": 0,
+            "灰霉病评级": 0,
+            "灰霉病叶片数": 0,
+            "枝枯病评级": 0,
+            "枝枯病叶片数": 0,
+
+            "其他虫害名称": null,
+            "其他虫害数量": 0,
+            "其他病害名称": null,
+            "其他病害评级": 0,
+            "其他病害叶片数": 0,
+            "未知症状名称": null,
+            "未知症状数量": 0
         };
 
         savedRecords.forEach(item => {
             if (item.category === 'pest') {
-                if (item.pest_type === '蓟马') {
-                    if (item.detailed_counts) {
-                        row.thrips_1_count = item.detailed_counts.leaf1 || 0;
-                        row.thrips_2_count = item.detailed_counts.leaf2 || 0;
-                        row.thrips_3_count = item.detailed_counts.leaf3 || 0;
-                    }
-                } else if (item.pest_type === '蚜虫') {
-                    if (item.detailed_counts) {
-                        row.aphid_1_count = item.detailed_counts.leaf1 || 0;
-                        row.aphid_2_count = item.detailed_counts.leaf2 || 0;
-                        row.aphid_3_count = item.detailed_counts.leaf3 || 0;
-                    }
-                } else if (item.pest_type === '茶黄螨') {
-                    if (item.detailed_counts) {
-                        row.broad_mite_1_count = item.detailed_counts.leaf1 || 0;
-                        row.broad_mite_2_count = item.detailed_counts.leaf2 || 0;
-                        row.broad_mite_3_count = item.detailed_counts.leaf3 || 0;
-                    }
-                } else if (item.pest_type === 'spider mite' || item.pest_type === '红蜘蛛') {
-                    if (item.detailed_counts) {
-                        row.spider_mite_1_count = item.detailed_counts.leaf1 || 0;
-                        row.spider_mite_2_count = item.detailed_counts.leaf2 || 0;
-                        row.spider_mite_3_count = item.detailed_counts.leaf3 || 0;
-                    }
+                if (item.pest_type === '蓟马' && item.detailed_counts) {
+                    row["蓟马_第1叶"] = item.detailed_counts.leaf1 || 0;
+                    row["蓟马_第2叶"] = item.detailed_counts.leaf2 || 0;
+                    row["蓟马_第3叶"] = item.detailed_counts.leaf3 || 0;
+                } else if (item.pest_type === '蚜虫' && item.detailed_counts) {
+                    row["蚜虫_第1叶"] = item.detailed_counts.leaf1 || 0;
+                    row["蚜虫_第2叶"] = item.detailed_counts.leaf2 || 0;
+                    row["蚜虫_第3叶"] = item.detailed_counts.leaf3 || 0;
+                } else if (item.pest_type === '茶黄螨' && item.detailed_counts) {
+                    row["茶黄螨_第1叶"] = item.detailed_counts.leaf1 || 0;
+                    row["茶黄螨_第2叶"] = item.detailed_counts.leaf2 || 0;
+                    row["茶黄螨_第3叶"] = item.detailed_counts.leaf3 || 0;
+                } else if ((item.pest_type === 'spider mite' || item.pest_type === '红蜘蛛') && item.detailed_counts) {
+                    row["红蜘蛛_第1叶"] = item.detailed_counts.leaf1 || 0;
+                    row["红蜘蛛_第2叶"] = item.detailed_counts.leaf2 || 0;
+                    row["红蜘蛛_第3叶"] = item.detailed_counts.leaf3 || 0;
                 } else if (item.pest_type === '青虫') {
-                    row.green_caterpillar_count = item.pest_count || 0;
+                    row["青虫数量"] = item.pest_count || 0;
                 } else if (item.pest_type === '果蝇') {
-                    row.fruit_fly_count = item.pest_count || 0;
-                    row.male_spotted_wing_drosophila_count = item.male_spotted_wing_drosophila_count || 0;
+                    row["果蝇总数"] = item.pest_count || 0;
+                    row["雄性斑翅果蝇数量"] = item.male_spotted_wing_drosophila_count || 0;
                 } else {
-                    row[`other_${item.pest_type}_count`] = item.pest_count || 0;
+                    row["其他虫害名称"] = item.pest_type || null;
+                    row["其他虫害数量"] = item.pest_count || 0;
                 }
             } else if (item.category === 'disease') {
                 if (item.pest_type === '白粉病') {
-                    row.powdery_mildew_rating = item.disease_level || 0;
-                    row.powdery_mildew_leaf_count = item.disease_leaf_count || 0;
+                    row["白粉病评级"] = item.disease_level || 0;
+                    row["白粉病叶片数"] = item.disease_leaf_count || 0;
                 } else if (item.pest_type === '灰霉病') {
-                    row.botrytis_rating = item.disease_level || 0;
-                    row.botrytis_leaf_count = item.disease_leaf_count || 0;
+                    row["灰霉病评级"] = item.disease_level || 0;
+                    row["灰霉病叶片数"] = item.disease_leaf_count || 0;
+                } else if (item.pest_type === '枝枯病') {
+                    row["枝枯病评级"] = item.disease_level || 0;
+                    row["枝枯病叶片数"] = item.disease_leaf_count || 0;
                 } else {
-                    row[`${item.pest_type}_rating`] = item.disease_level || 0;
-                    row[`${item.pest_type}_leaf_count`] = item.disease_leaf_count || 0;
+                    row["其他病害名称"] = item.pest_type || null;
+                    row["其他病害评级"] = item.disease_level || 0;
+                    row["其他病害叶片数"] = item.disease_leaf_count || 0;
                 }
+            } else if (item.category === 'unknown') {
+                row["未知症状名称"] = item.pest_type || null;
+                row["未知症状数量"] = item.pest_count || 0;
             }
         });
 
@@ -985,7 +986,7 @@ return responseText ? JSON.parse(responseText) : {};
             showHome();
         } catch (err) {
             console.error('批量提交失败', err);
-            showMessageHome('批量提交失败，请稍后重试', true);
+            showMessageHome(`批量提交失败: ${err.message || err}`, true);
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
