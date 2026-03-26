@@ -583,7 +583,7 @@
                 record = { ...payload };
                 delete record.is_batch;
                 delete record._id;
-                delete record.created_at;
+                record.created_at = payload.timestamp;
                 delete record.timestamp;
                 delete record.unix_ms;
                 delete record.pending_time;
@@ -600,6 +600,7 @@
                     leaf1_count: payload.detailed_counts?.leaf1 || null,
                     leaf2_count: payload.detailed_counts?.leaf2 || null,
                     leaf3_count: payload.detailed_counts?.leaf3 || null,
+                    created_at: payload.timestamp,
                     raw_json: payload
                 };
             }
