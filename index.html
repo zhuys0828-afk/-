@@ -880,16 +880,20 @@
 
             "白粉病评级": 0,
             "白粉病叶片数": 0,
+            "白粉病数量": 0,
             "灰霉病评级": 0,
             "灰霉病叶片数": 0,
+            "灰霉病数量": 0,
             "枝枯病评级": 0,
             "枝枯病叶片数": 0,
+            "枝枯病数量": 0,
 
             "其他虫害名称": null,
             "其他虫害数量": 0,
             "其他病害名称": null,
             "其他病害评级": 0,
             "其他病害叶片数": 0,
+            "其他病害数量": 0,
             "未知症状名称": null,
             "未知症状数量": 0
         };
@@ -925,16 +929,20 @@
                 if (item.pest_type === '白粉病') {
                     row["白粉病评级"] = item.disease_level || 0;
                     row["白粉病叶片数"] = item.disease_leaf_count || 0;
+                    row["白粉病数量"] = item.pest_count || 0;
                 } else if (item.pest_type === '灰霉病') {
                     row["灰霉病评级"] = item.disease_level || 0;
                     row["灰霉病叶片数"] = item.disease_leaf_count || 0;
+                    row["灰霉病数量"] = item.pest_count || 0;
                 } else if (item.pest_type === '枝枯病') {
                     row["枝枯病评级"] = item.disease_level || 0;
                     row["枝枯病叶片数"] = item.disease_leaf_count || 0;
+                    row["枝枯病数量"] = item.pest_count || 0;
                 } else {
                     row["其他病害名称"] = item.pest_type || null;
                     row["其他病害评级"] = item.disease_level || 0;
                     row["其他病害叶片数"] = item.disease_leaf_count || 0;
+                    row["其他病害数量"] = item.pest_count || 0;
                 }
             } else if (item.category === 'unknown') {
                 row["未知症状名称"] = item.pest_type || null;
@@ -990,7 +998,7 @@
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerText = '📤 一键提交当前点位全部记录';
+                submitBtn.innerText = '✅ 已提交';
             }
         }
     }
