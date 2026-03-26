@@ -393,10 +393,12 @@
 
 
         <div class="message-box" id="globalMsgHome">📋 点击任意病害/虫害开始计数</div>
+        <div style="display:flex; justify-content:center; margin-top:10px;">
+            <button id="batchSubmitBtn" class="step-btn" style="max-width:420px; width:100%; background:#f4b942; color:#1e2a2e;">📤 一键提交当前点位全部记录</button>
+        </div>
         <div class="saved-records-box" id="savedRecordsArea">
             <div class="field-label" style="margin-bottom:6px;">💾 已保存记录</div>
             <div id="savedRecordsList" class="saved-record-list">目前暂无记录</div>
-            <button id="batchSubmitBtn" class="step-btn" style="margin-top:8px; background:#f4b942; color:#1e2a2e;">📤 一键提交当前点位全部记录</button>
         </div>
         <footer>⚡ 大按钮 · 离线缓存 · 减少滑动</footer>
     </div>
@@ -533,18 +535,23 @@
             console.log(`已清理 ${queue.length - filtered.length} 条过期离线数据`);
         }
     }
+
+    function getPhoneLocalTimestamp() {
+        const now = new Date();
+        const pad = (v) => String(v).padStart(2, '0');
+        const y = now.getFullYear();
+        const m = pad(now.getMonth() + 1);
+        const d = pad(now.getDate());
+        const h = pad(now.getHours());
+        const min = pad(now.getMinutes());
+        const s = pad(now.getSeconds());
+        return `${y}-${m}-${d} ${h}:${min}:${s}`;
+    }
+
     function addPendingRecord(data) {
         const q = getPendingQueue();
         const recordId = generateId();
-        const now = new Date();
-        const localTime = now.toLocaleString('zh-CN', { 
-            year: 'numeric', 
-            month: '2-digit', 
-            day: '2-digit', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-        }).replace(/\//g, '-').replace(',', '');
+        const localTime = getPhoneLocalTimestamp();
         q.push({ ...data, pending_time: localTime, _id: recordId });
         savePendingQueue(q);
         showDetailMessage(`⚠️ 网络异常，数据已本地暂存 (待传${q.length}条)`, true);
@@ -602,11 +609,8 @@
             }
             
             // Supabase可能返回空响应，尝试解析JSON
-            if (response.status === 201 || response.status === 200) {
-    return { success: true }; 
-}
-const responseText = await response.text();
-return responseText ? JSON.parse(responseText) : {};
+            const responseText = await response.text();
+            return responseText ? JSON.parse(responseText) : {};
         } catch (err) {
             clearTimeout(timeoutId);
             throw err;
@@ -702,19 +706,11 @@ return responseText ? JSON.parse(responseText) : {};
         }
 
         const now = new Date();
-        // 使用本地时间而不是UTC时间
-        const timestamp = now.toLocaleString('zh-CN', { 
-            year: 'numeric', 
-            month: '2-digit', 
-            day: '2-digit', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-        }).replace(/\//g, '-').replace(',', '');
+        const timestamp = getPhoneLocalTimestamp();
         let pestCountValue;
         let subCounts = null;
 
-        if (currentDetail.multiMode && currentDetail.name === "蓟马") {
+        if (currentDetail.multiMode && (currentDetail.name === "蓟马" || currentDetail.name === "蚜虫")) {
             subCounts = {
                 leaf1: currentDetail.counts[0],
                 leaf2: currentDetail.counts[1],
@@ -748,6 +744,7 @@ return responseText ? JSON.parse(responseText) : {};
             unix_ms: now.getTime()
         };
 
+        console.log('submitCurrentData payload', payload);
         savedRecords.push(payload);
         renderSavedRecords();
 
@@ -757,7 +754,7 @@ return responseText ? JSON.parse(responseText) : {};
             submitBtn.innerText = "✔️ 已保存";
             setTimeout(() => {
                 submitBtn.disabled = false;
-                submitBtn.innerText = "💾 保存记录";
+                submitBtn.innerText = "保存记录";
             }, 800);
         }
 
@@ -786,15 +783,7 @@ return responseText ? JSON.parse(responseText) : {};
     }
 
     function buildWideRow() {
-        const now = new Date();
-        const localTimestamp = now.toLocaleString('zh-CN', { 
-            year: 'numeric', 
-            month: '2-digit', 
-            day: '2-digit', 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-        }).replace(/\//g, '-').replace(',', '');
+        const localTimestamp = getPhoneLocalTimestamp();
         
         const row = {
             point_id: currentPointId,
@@ -859,13 +848,6 @@ return responseText ? JSON.parse(responseText) : {};
             return;
         }
         
-        // 检查是否已经提交过这个点位
-        const submittedKey = `submitted_${currentPointId}`;
-        if (localStorage.getItem(submittedKey)) {
-            showMessageHome('此点位已提交过数据，不能重复提交', true);
-            return;
-        }
-        
         if (savedRecords.length === 0) {
             showMessageHome('当前无缓存记录可提交', true);
             return;
@@ -882,9 +864,6 @@ return responseText ? JSON.parse(responseText) : {};
         try {
             await submitToServer({ ...row, is_batch: true });
             showMessageHome(`✅ 已提交 ${savedRecords.length} 条数据`, false);
-            
-            // 标记此点位已提交
-            localStorage.setItem(submittedKey, 'true');
             
             // 清空所有本地数据
             savedRecords = [];
@@ -1095,7 +1074,7 @@ return responseText ? JSON.parse(responseText) : {};
                 </div>
             `;
         }
-        html += `<button id="submitDetailBtn" class="submit-btn-large">  保存记录</button>`;
+        html += `<button id="submitDetailBtn" class="submit-btn-large">保存记录</button>`;
         detailDynamic.innerHTML = html;
 
         // 绑定事件
