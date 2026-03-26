@@ -349,6 +349,42 @@
             opacity: 0.6;
             pointer-events: none;
         }
+        /* 详情页紧凑布局，减少上下滑动 */
+        #detailPage .detail-header {
+            margin-bottom: 8px;
+        }
+        #detailPage .detail-name {
+            font-size: 1.7rem;
+            padding: 6px 16px;
+        }
+        #detailPage .field-card {
+            padding: 10px 12px;
+            margin-bottom: 10px;
+        }
+        #detailPage .field-label {
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+        #detailPage .count-digit {
+            font-size: 2.4rem;
+            padding: 6px;
+            margin: 4px 0;
+            letter-spacing: 2px;
+        }
+        #detailPage .btn-row {
+            gap: 6px;
+            margin-top: 6px;
+        }
+        #detailPage .step-btn {
+            font-size: 1.05rem;
+            padding: 6px 10px;
+            min-width: 56px;
+        }
+        #detailPage .submit-btn-large {
+            font-size: 1.45rem;
+            padding: 12px;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -938,7 +974,8 @@
             singleCount: 0,
             otherPestName: "",
             otherDiseaseName: "",
-            diseaseLevel: 0
+            diseaseLevel: 0,
+            diseaseLeafCount: 0
         };
 
         let html = `<div class="detail-header"><div class="detail-name">🔍 ${name}</div></div>`;
@@ -963,7 +1000,7 @@
             html += `
                 <div class="field-card">
                     <div class="field-label">📝 虫害名称</div>
-                    <input type="text" id="otherPestNameInput" class="inspector-input" placeholder="请输入虫害名称" style="margin-bottom: 12px; font-size: 1rem; padding: 10px 14px;">
+                    <input type="text" id="otherPestNameInput" class="inspector-input" placeholder="请输入虫害名称" style="margin-bottom: 8px; font-size: 1rem; padding: 8px 12px;">
                 </div>
                 <div class="field-card">
                     <div class="field-label">🐛 发生数量 (头/株/叶片)</div>
@@ -983,7 +1020,7 @@
                 html += `
                     <div class="field-card">
                         <div class="field-label">📝 病害名称</div>
-                        <input type="text" id="otherDiseaseNameInput" class="inspector-input" placeholder="请输入病害名称" style="margin-bottom: 12px; font-size: 1rem; padding: 10px 14px;">
+                        <input type="text" id="otherDiseaseNameInput" class="inspector-input" placeholder="请输入病害名称" style="margin-bottom: 8px; font-size: 1rem; padding: 8px 12px;">
                     </div>
                 `;
             }
@@ -1045,7 +1082,7 @@
             html += `
                 <div class="field-card">
                     <div class="field-label">📝 症状名称</div>
-                    <input type="text" id="unknownNameInput" class="inspector-input" placeholder="请输入症状名称" style="margin-bottom: 12px; font-size: 1rem; padding: 10px 14px;">
+                    <input type="text" id="unknownNameInput" class="inspector-input" placeholder="请输入症状名称" style="margin-bottom: 8px; font-size: 1rem; padding: 8px 12px;">
                 </div>
                 <div class="field-card">
                     <div class="field-label">🐛 发生数量 (株/叶片)</div>
