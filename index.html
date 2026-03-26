@@ -506,20 +506,6 @@
     function generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
-
-    // 获取手机本地时间（带格式）
-    function getDeviceLocalTimestamp() {
-        const now = new Date();
-        const formatted = now.toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        }).replace(/\//g, '-').replace(',', '').trim();
-        return { formatted, unix_ms: now.getTime() };
-    }
     
     function getPendingQueue() {
         const raw = localStorage.getItem(PENDING_KEY);
@@ -547,11 +533,24 @@
             console.log(`已清理 ${queue.length - filtered.length} 条过期离线数据`);
         }
     }
+
+    function getPhoneLocalTimestamp() {
+        const now = new Date();
+        const pad = (v) => String(v).padStart(2, '0');
+        const y = now.getFullYear();
+        const m = pad(now.getMonth() + 1);
+        const d = pad(now.getDate());
+        const h = pad(now.getHours());
+        const min = pad(now.getMinutes());
+        const s = pad(now.getSeconds());
+        return `${y}-${m}-${d} ${h}:${min}:${s}`;
+    }
+
     function addPendingRecord(data) {
         const q = getPendingQueue();
         const recordId = generateId();
-        const ts = getDeviceLocalTimestamp();
-        q.push({ ...data, pending_time: ts.formatted, unix_ms: ts.unix_ms, _id: recordId });
+        const localTime = getPhoneLocalTimestamp();
+        q.push({ ...data, pending_time: localTime, _id: recordId });
         savePendingQueue(q);
         showDetailMessage(`⚠️ 网络异常，数据已本地暂存 (待传${q.length}条)`, true);
         setTimeout(() => retryAllPending(), 5000);
@@ -704,8 +703,8 @@
             }
         }
 
-        const ts = getDeviceLocalTimestamp();
-        const timestamp = ts.formatted; // 手机本地时间
+        const now = new Date();
+        const timestamp = getPhoneLocalTimestamp();
         let pestCountValue;
         let subCounts = null;
 
@@ -781,8 +780,7 @@
     }
 
     function buildWideRow() {
-        const ts = getDeviceLocalTimestamp();
-        const localTimestamp = ts.formatted;
+        const localTimestamp = getPhoneLocalTimestamp();
         
         const row = {
             point_id: currentPointId,
@@ -846,7 +844,7 @@
             showMessageHome('请先选择点位', true);
             return;
         }
-
+        
         if (savedRecords.length === 0) {
             showMessageHome('当前无缓存记录可提交', true);
             return;
@@ -864,7 +862,6 @@
             await submitToServer({ ...row, is_batch: true });
             showMessageHome(`✅ 已提交 ${savedRecords.length} 条数据`, false);
             
-            // 不再使用“点位唯一提交”标记，允许新 NFC URL 复用一个新的点位
             // 清空所有本地数据
             savedRecords = [];
             renderSavedRecords();
@@ -1227,8 +1224,8 @@
 
     // 初始化
     function init() {
-        // 不自动清空全局存储，保留姓名、离线队列等，防止意外丢失
-        // 如需控制点位唯一提交，本逻辑已取消，提交完成时会清空缓存并刷新状态
+        // 每次刷新时清空所有本地存储
+        localStorage.clear();
         
         currentPointId = getPointIdFromUrl();
         homePointSpan.innerHTML = `🌾 ${currentPointId}`;
