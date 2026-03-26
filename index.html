@@ -328,6 +328,25 @@
             border-bottom: 1px solid #e0e0e0;
             font-size: 0.85rem;
             color: #333333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .saved-record-text {
+            flex: 1;
+            min-width: 0;
+            word-break: break-word;
+        }
+        .saved-record-delete {
+            border: none;
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: #dc3545;
+            color: #ffffff;
+            cursor: pointer;
         }
         /* 蓟马/蚜虫三枝条页再紧凑一些，减少上下滑动 */
         #detailPage .stepper-item {
@@ -391,8 +410,10 @@
             <div class="grid-cards" id="pestGroup">
                 <div class="pest-card" data-type="pest" data-name="蓟马" data-multi="true">蓟马<br><span style="font-size:0.75rem;">3叶片计数</span></div>
                 <div class="pest-card" data-type="pest" data-name="蚜虫" data-multi="true">蚜虫<br><span style="font-size:0.75rem;">3叶片计数</span></div>
-                <div class="pest-card" data-type="pest" data-name="红蜘蛛" data-multi="false">红蜘蛛</div>
+                <div class="pest-card" data-type="pest" data-name="茶黄螨" data-multi="true">茶黄螨<br><span style="font-size:0.75rem;">3叶片计数</span></div>
+                <div class="pest-card" data-type="pest" data-name="红蜘蛛" data-multi="true">红蜘蛛<br><span style="font-size:0.75rem;">3叶片计数</span></div>
                 <div class="pest-card" data-type="pest" data-name="青虫" data-multi="false">青虫</div>
+                <div class="pest-card" data-type="pest" data-name="果蝇" data-multi="false">果蝇</div>
                 <div class="pest-card" data-type="pest" data-name="其他虫害" data-multi="false">其他</div>
             </div>
         </div>
@@ -431,7 +452,7 @@
         </div>
         <div id="detailDynamicContent"></div>
         <div class="message-box" id="detailMsg">等待填写数据</div>
-        <footer>点击+快速计数，提交后返回首页继续采集</footer>
+        <footer>点击+快速计数，提交后返回首页</footer>
     </div>
 </div>
 
@@ -597,6 +618,7 @@
                     pest_count: payload.pest_count,
                     disease_level: payload.disease_level || null,
                     disease_leaf_count: payload.disease_leaf_count || null,
+                    male_spotted_wing_drosophila_count: payload.male_spotted_wing_drosophila_count || null,
                     leaf1_count: payload.detailed_counts?.leaf1 || null,
                     leaf2_count: payload.detailed_counts?.leaf2 || null,
                     leaf3_count: payload.detailed_counts?.leaf3 || null,
@@ -737,13 +759,18 @@ return responseText ? JSON.parse(responseText) : {};
         let pestCountValue;
         let subCounts = null;
 
-        if (currentDetail.multiMode && currentDetail.name === "蓟马") {
+        if (currentDetail.multiMode && (currentDetail.name === "蓟马" || currentDetail.name === "蚜虫" || currentDetail.name === "茶黄螨" || currentDetail.name === "红蜘蛛")) {
             subCounts = {
                 leaf1: currentDetail.counts[0],
                 leaf2: currentDetail.counts[1],
                 leaf3: currentDetail.counts[2]
             };
             pestCountValue = currentDetail.counts[0] + currentDetail.counts[1] + currentDetail.counts[2];
+        } else if (currentDetail.name === "果蝇") {
+            pestCountValue = currentDetail.fruitFlyCount;
+            subCounts = {
+                male_spotted_wing_drosophila: currentDetail.maleSpottedWingDrosophilaCount
+            };
         } else {
             pestCountValue = currentDetail.singleCount;
         }
@@ -751,6 +778,8 @@ return responseText ? JSON.parse(responseText) : {};
         let pestType = currentDetail.name;
         if (currentDetail.name === "其他虫害") {
             pestType = currentDetail.otherPestName;
+        } else if (currentDetail.name === "红蜘蛛") {
+            pestType = "spider mite";
         } else if (currentDetail.name === "其他病害") {
             pestType = currentDetail.otherDiseaseName;
         } else if (currentDetail.name === "未知症状") {
@@ -766,6 +795,7 @@ return responseText ? JSON.parse(responseText) : {};
             pest_count: pestCountValue,
             disease_level: currentDetail.type === "disease" ? currentDetail.diseaseLevel : null,
             disease_leaf_count: currentDetail.type === "disease" ? currentDetail.diseaseLeafCount : null,
+            male_spotted_wing_drosophila_count: currentDetail.name === "果蝇" ? currentDetail.maleSpottedWingDrosophilaCount : null,
             detailed_counts: subCounts,
             timestamp: timestamp,
             unix_ms: now.getTime()
@@ -801,11 +831,29 @@ return responseText ? JSON.parse(responseText) : {};
         }
 
         list.innerHTML = savedRecords.map((item, index) => {
-            const title = item.category === 'disease'
-                ? `${item.pest_type} 评级${item.disease_level} 叶片${item.disease_leaf_count || 0}`
-                : `${item.pest_type} ${item.pest_count} (蓟马/蚜虫可能多叶)`;
-            return `<div class="saved-record-item">${index + 1}. ${title}</div>`;
+            let title;
+            if (item.category === 'disease') {
+                title = `${item.pest_type} 评级${item.disease_level} 叶片${item.disease_leaf_count || 0}`;
+            } else if (item.pest_type === '果蝇') {
+                title = `果蝇 总数${item.pest_count || 0} 雄性斑翅果蝇${item.male_spotted_wing_drosophila_count || 0}`;
+            } else {
+                const pestName = item.pest_type === 'spider mite' ? '红蜘蛛(spider mite)' : item.pest_type;
+                title = `${pestName} ${item.pest_count} (三叶监测/单计数)`;
+            }
+            return `<div class="saved-record-item"><span class="saved-record-text">${index + 1}. ${title}</span><button class="saved-record-delete" data-record-index="${index}">删除</button></div>`;
         }).join('');
+
+        list.querySelectorAll('.saved-record-delete').forEach(btn => {
+            btn.onclick = (e) => {
+                e.preventDefault();
+                const idx = parseInt(btn.getAttribute('data-record-index'), 10);
+                if (!isNaN(idx)) {
+                    savedRecords.splice(idx, 1);
+                    renderSavedRecords();
+                    showMessageHome('已删除1条保存记录', false);
+                }
+            };
+        });
     }
 
     function buildWideRow() {
@@ -830,8 +878,15 @@ return responseText ? JSON.parse(responseText) : {};
             aphid_1_count: 0,
             aphid_2_count: 0,
             aphid_3_count: 0,
-            red_spider_count: 0,
+            broad_mite_1_count: 0,
+            broad_mite_2_count: 0,
+            broad_mite_3_count: 0,
+            spider_mite_1_count: 0,
+            spider_mite_2_count: 0,
+            spider_mite_3_count: 0,
             green_caterpillar_count: 0,
+            fruit_fly_count: 0,
+            male_spotted_wing_drosophila_count: 0,
             powdery_mildew_rating: 0,
             powdery_mildew_leaf_count: 0,
             botrytis_rating: 0,
@@ -852,10 +907,23 @@ return responseText ? JSON.parse(responseText) : {};
                         row.aphid_2_count = item.detailed_counts.leaf2 || 0;
                         row.aphid_3_count = item.detailed_counts.leaf3 || 0;
                     }
-                } else if (item.pest_type === '红蜘蛛') {
-                    row.red_spider_count = item.pest_count || 0;
+                } else if (item.pest_type === '茶黄螨') {
+                    if (item.detailed_counts) {
+                        row.broad_mite_1_count = item.detailed_counts.leaf1 || 0;
+                        row.broad_mite_2_count = item.detailed_counts.leaf2 || 0;
+                        row.broad_mite_3_count = item.detailed_counts.leaf3 || 0;
+                    }
+                } else if (item.pest_type === 'spider mite' || item.pest_type === '红蜘蛛') {
+                    if (item.detailed_counts) {
+                        row.spider_mite_1_count = item.detailed_counts.leaf1 || 0;
+                        row.spider_mite_2_count = item.detailed_counts.leaf2 || 0;
+                        row.spider_mite_3_count = item.detailed_counts.leaf3 || 0;
+                    }
                 } else if (item.pest_type === '青虫') {
                     row.green_caterpillar_count = item.pest_count || 0;
+                } else if (item.pest_type === '果蝇') {
+                    row.fruit_fly_count = item.pest_count || 0;
+                    row.male_spotted_wing_drosophila_count = item.male_spotted_wing_drosophila_count || 0;
                 } else {
                     row[`other_${item.pest_type}_count`] = item.pest_count || 0;
                 }
@@ -980,6 +1048,8 @@ return responseText ? JSON.parse(responseText) : {};
             multiMode: multiMode,
             counts: [0, 0, 0],
             singleCount: 0,
+            fruitFlyCount: 0,
+            maleSpottedWingDrosophilaCount: 0,
             otherPestName: "",
             otherDiseaseName: "",
             diseaseLevel: 0,
@@ -988,7 +1058,7 @@ return responseText ? JSON.parse(responseText) : {};
 
         let html = `<div class="detail-header"><div class="detail-name">🔍 ${name}</div></div>`;
 
-        if (multiMode && (name === "蓟马" || name === "蚜虫")) {
+        if (multiMode && (name === "蓟马" || name === "蚜虫" || name === "茶黄螨" || name === "红蜘蛛")) {
             const labels = ["第1片叶/枝", "第2片叶/枝", "第3片叶/枝"];
             for (let i = 0; i < 3; i++) {
                 html += `
@@ -1004,6 +1074,29 @@ return responseText ? JSON.parse(responseText) : {};
                     </div>
                 `;
             }
+        } else if (name === "果蝇") {
+            html += `
+                <div class="field-card">
+                    <div class="field-label">🪰 果蝇总数</div>
+                    <div class="count-digit" id="fruitFlyTotalDisplay">0</div>
+                    <div class="btn-row">
+                        <button class="step-btn" data-fruit-total-step="1">+1</button>
+                        <button class="step-btn" data-fruit-total-step="3">+3</button>
+                        <button class="step-btn" data-fruit-total-step="5">+5</button>
+                        <button class="step-btn reset-btn-sm" id="resetFruitTotalBtn">归零</button>
+                    </div>
+                </div>
+                <div class="field-card">
+                    <div class="field-label">🧬 雄性斑翅果蝇</div>
+                    <div class="count-digit" id="maleSWDDisplay">0</div>
+                    <div class="btn-row">
+                        <button class="step-btn" data-male-swd-step="1">+1</button>
+                        <button class="step-btn" data-male-swd-step="3">+3</button>
+                        <button class="step-btn" data-male-swd-step="5">+5</button>
+                        <button class="step-btn reset-btn-sm" id="resetMaleSWDBtn">归零</button>
+                    </div>
+                </div>
+            `;
         } else if (name === "其他虫害") {
             html += `
                 <div class="field-card">
@@ -1123,7 +1216,7 @@ return responseText ? JSON.parse(responseText) : {};
         detailDynamic.innerHTML = html;
 
         // 绑定事件
-        if (multiMode && (name === "蓟马" || name === "蚜虫")) {
+        if (multiMode && (name === "蓟马" || name === "蚜虫" || name === "茶黄螨" || name === "红蜘蛛")) {
             for (let i = 0; i < 3; i++) {
                 const updateDisplay = () => {
                     const span = document.getElementById(`multiCount_${i}`);
@@ -1141,6 +1234,51 @@ return responseText ? JSON.parse(responseText) : {};
                 if (reset) reset.onclick = () => { currentDetail.counts[i] = 0; updateDisplay(); };
                 updateDisplay();
             }
+        } else if (name === "果蝇") {
+            const totalDisplay = document.getElementById('fruitFlyTotalDisplay');
+            const maleDisplay = document.getElementById('maleSWDDisplay');
+            const updateFruit = () => {
+                if (totalDisplay) totalDisplay.innerText = currentDetail.fruitFlyCount;
+                if (maleDisplay) maleDisplay.innerText = currentDetail.maleSpottedWingDrosophilaCount;
+            };
+
+            document.querySelectorAll('[data-fruit-total-step]').forEach(btn => {
+                const step = parseInt(btn.getAttribute('data-fruit-total-step'), 10);
+                if (!isNaN(step)) {
+                    btn.onclick = () => {
+                        currentDetail.fruitFlyCount = Math.min(999, currentDetail.fruitFlyCount + step);
+                        updateFruit();
+                    };
+                }
+            });
+
+            document.querySelectorAll('[data-male-swd-step]').forEach(btn => {
+                const step = parseInt(btn.getAttribute('data-male-swd-step'), 10);
+                if (!isNaN(step)) {
+                    btn.onclick = () => {
+                        currentDetail.maleSpottedWingDrosophilaCount = Math.min(999, currentDetail.maleSpottedWingDrosophilaCount + step);
+                        updateFruit();
+                    };
+                }
+            });
+
+            const resetTotalBtn = document.getElementById('resetFruitTotalBtn');
+            if (resetTotalBtn) {
+                resetTotalBtn.onclick = () => {
+                    currentDetail.fruitFlyCount = 0;
+                    updateFruit();
+                };
+            }
+
+            const resetMaleBtn = document.getElementById('resetMaleSWDBtn');
+            if (resetMaleBtn) {
+                resetMaleBtn.onclick = () => {
+                    currentDetail.maleSpottedWingDrosophilaCount = 0;
+                    updateFruit();
+                };
+            }
+
+            updateFruit();
         } else {
             const displaySpan = document.getElementById('singleCountDisplay');
             const updateSingle = () => { if (displaySpan) displaySpan.innerText = currentDetail.singleCount; };
@@ -1277,8 +1415,12 @@ return responseText ? JSON.parse(responseText) : {};
 
     // 初始化
     function init() {
-        // 每次刷新时清空所有本地存储
+        // 保留监查人员姓名，其它本地缓存继续按原逻辑清空
+        const savedInspector = localStorage.getItem('pest_inspector_v3');
         localStorage.clear();
+        if (savedInspector && savedInspector.trim() !== "") {
+            localStorage.setItem('pest_inspector_v3', savedInspector);
+        }
         
         currentPointId = getPointIdFromUrl();
         homePointSpan.innerHTML = `🌾 ${currentPointId}`;
@@ -1312,3 +1454,4 @@ return responseText ? JSON.parse(responseText) : {};
 </script>
 </body>
 </html>
+
